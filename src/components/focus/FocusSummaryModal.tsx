@@ -44,7 +44,7 @@ export const FocusSummaryModal: React.FC = () => {
             <CuteKittenMascot className="w-12 h-12" />
           </div>
           <span className="text-[10px] font-black uppercase tracking-widest text-purple-700 bg-purple-100 px-3 py-0.5 rounded-full">
-            Session Summary ✨
+            Session Summary
           </span>
           <h3 className="text-xl font-black text-slate-800 font-['Quicksand',sans-serif]">
             Amazing Focus, Aiko! 🌸
@@ -151,7 +151,7 @@ export const FocusSummaryModal: React.FC = () => {
           onClick={dismissSummaryModal}
           className="w-full py-3.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-95 text-white font-black text-xs shadow-md shadow-purple-200 transition-colors"
         >
-          Return to Dashboard ✨
+          Return to Dashboard
         </button>
       </div>
     </div>

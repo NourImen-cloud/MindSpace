@@ -275,7 +275,6 @@ export const EmilyDashboard: React.FC = () => {
                 </div>
                 <div className="text-[11px] font-bold text-purple-600/70 flex items-center justify-center gap-1">
                   <span>{userProfile.role}</span>
-                  <span className="text-amber-400 text-xs">✨</span>
                 </div>
               </div>
             </div>
@@ -300,7 +299,7 @@ export const EmilyDashboard: React.FC = () => {
               {/* Pillar 1: SIGNATURE SANCTUARY */}
               <div className="space-y-1">
                 <div className="px-3 text-[9px] font-black uppercase tracking-wider text-purple-700/60">
-                  Signature Features ✨
+                  Signature Features
                 </div>
 
                 <button

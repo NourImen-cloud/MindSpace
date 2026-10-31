@@ -293,7 +293,7 @@ export const TaskManager: React.FC = () => {
         <div className="fixed inset-0 bg-purple-950/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-purple-100 rounded-[32px] w-full max-w-lg p-6 space-y-4 shadow-2xl">
             <h3 className="text-lg font-black text-slate-800 font-['Quicksand',sans-serif]">
-              Create New Study Task ✨
+              Create New Study Task
             </h3>
             <form onSubmit={handleCreateTask} className="space-y-3.5">
               <div>

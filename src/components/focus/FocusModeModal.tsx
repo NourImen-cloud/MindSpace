@@ -75,7 +75,7 @@ export const FocusModeModal: React.FC = () => {
       <div className="flex flex-col items-center text-center space-y-4 max-w-lg my-auto">
         <div className="space-y-1">
           <span className="text-[11px] font-black text-purple-600 uppercase tracking-widest">
-            Anchor Study Task ✨
+            Anchor Study Task
           </span>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight font-['Quicksand',sans-serif]">
             {activeFocusSession.taskTitle}

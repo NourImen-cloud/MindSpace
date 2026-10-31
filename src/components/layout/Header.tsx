@@ -52,7 +52,7 @@ export const Header: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-purple-600/80 font-medium hidden sm:block">
-              Your mindful study companion & digital sanctuary ✨
+              Your mindful study companion & digital sanctuary
             </p>
           </div>
         </div>

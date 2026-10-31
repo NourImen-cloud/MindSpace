@@ -117,8 +117,7 @@ export const FocusModeView: React.FC = () => {
           <CozyStudyGirlIllustration className="w-48 h-48 sm:w-56 sm:h-56" />
         </div>
 
-        {/* Ambient floating sparkles */}
-        <span className="absolute top-2 right-4 text-sm animate-bounce">✨</span>
+        {/* Ambient floating elements */}
         <span className="absolute bottom-6 left-4 text-xs animate-pulse">🌸</span>
       </div>
 
@@ -132,7 +131,6 @@ export const FocusModeView: React.FC = () => {
         </div>
         <p className="text-xs font-semibold text-purple-600/90 flex items-center justify-center gap-1">
           <span>Focus on your goal!</span>
-          <Sparkles className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
         </p>
 
         {activeTask && (
@@ -166,7 +164,7 @@ export const FocusModeView: React.FC = () => {
             onClick={() => stopFocusSession(true)}
             className="mt-2 text-xs font-bold text-purple-600 hover:text-purple-800"
           >
-            Complete Session Early ✨
+            Complete Session Early
           </button>
         )}
       </div>

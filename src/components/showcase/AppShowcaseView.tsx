@@ -111,7 +111,7 @@ export const AppShowcaseView: React.FC = () => {
           <div className="relative p-6 rounded-3xl bg-gradient-to-br from-purple-100/70 via-pink-50 to-indigo-100/60 border border-purple-200/80 shadow-md flex items-center justify-between overflow-hidden">
             <div className="space-y-1 relative z-10 max-w-[200px]">
               <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-white/80 px-2 py-0.5 rounded-full border border-purple-200">
-                Aesthetic & Cozy ✨
+                Aesthetic & Cozy
               </span>
               <h3 className="text-base font-black text-slate-800 font-['Quicksand',sans-serif]">
                 A sanctuary for your daily focus
@@ -197,7 +197,7 @@ export const AppShowcaseView: React.FC = () => {
             <div className="w-full bg-[#FAF7FD] pt-3 px-6 pb-2 flex items-center justify-between z-20 shrink-0 border-b border-purple-100/60">
               <span className="text-[12px] font-bold text-slate-700">9:41</span>
               <div className="w-24 h-4 bg-slate-900 rounded-full" />
-              <span className="text-[11px] font-bold text-purple-600">MindSpace ✨</span>
+              <span className="text-[11px] font-bold text-purple-600">MindSpace</span>
             </div>
 
             {/* Live Interactive Screen Content */}

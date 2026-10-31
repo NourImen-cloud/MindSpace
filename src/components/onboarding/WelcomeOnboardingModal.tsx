@@ -437,7 +437,7 @@ export const WelcomeOnboardingModal: React.FC = () => {
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>{isAiOrganized ? 'AI Optimized ✨' : 'Auto-Schedule Day ✨'}</span>
+                  <span>{isAiOrganized ? 'AI Optimized' : 'Auto-Schedule Day'}</span>
                 </button>
               </div>
 

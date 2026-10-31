@@ -67,7 +67,7 @@ export const WeeklyReflectionModal: React.FC = () => {
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-800 font-['Quicksand',sans-serif] flex items-center gap-2">
             <BookHeart className="w-6 h-6 text-pink-500" />
-            <span>Weekly Reflection Journal ✨</span>
+            <span>Weekly Reflection Journal</span>
           </h2>
           <p className="text-xs text-purple-600/80 font-medium">
             Pause once a week to celebrate study wins and recalibrate routines with kindness.
@@ -184,7 +184,7 @@ export const WeeklyReflectionModal: React.FC = () => {
           {savedSuccess ? (
             <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Saved to reflection archives! ✨</span>
+              <span>Saved to reflection archives!</span>
             </span>
           ) : <div />}
 

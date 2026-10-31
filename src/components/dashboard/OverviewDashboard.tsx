@@ -113,7 +113,7 @@ export const OverviewDashboard: React.FC = () => {
         <div className="p-3 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 text-xs text-purple-100 flex items-center gap-2 relative z-10">
           <Quote className="w-4 h-4 text-amber-200 shrink-0 rotate-180" />
           <span className="font-semibold italic">
-            "Discipline today, success tomorrow." ✨
+            "Discipline today, success tomorrow."
           </span>
         </div>
       </div>

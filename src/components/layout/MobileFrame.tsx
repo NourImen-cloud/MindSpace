@@ -23,7 +23,7 @@ export const MobileFrame: React.FC<{ children: React.ReactNode }> = ({ children 
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-indigo-100 flex flex-col items-center justify-center p-2 sm:p-6 py-6">
       <div className="text-center mb-3">
         <span className="text-xs text-purple-700 font-extrabold bg-white/80 px-4 py-1.5 rounded-full border border-purple-200 shadow-sm flex items-center gap-2">
-          <span>✨ Mobile Phone View — Study Companion</span>
+          <span>Mobile Phone View — Study Companion</span>
         </span>
       </div>
 
