@@ -124,13 +124,10 @@ export const ClayCloud: React.FC<{ className?: string }> = ({ className = "w-7 h
 // 4. 3D Purple Clipboard (Tasks Done 24)
 export const ClayClipboard: React.FC<{ className?: string }> = ({ className = "w-12 h-12" }) => (
   <svg viewBox="0 0 64 64" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Board */}
     <rect x="12" y="10" width="40" height="48" rx="10" fill="#DDD6FE" />
     <rect x="14" y="12" width="36" height="44" rx="8" fill="#EDE9FE" />
-    {/* Clip at top */}
     <rect x="22" y="6" width="20" height="10" rx="5" fill="#A78BFA" />
     <circle cx="32" cy="11" r="2.5" fill="#EDE9FE" />
-    {/* Check lines */}
     <path d="M22 28L26 32L34 24" stroke="#8B5CF6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M22 42L26 46L34 38" stroke="#8B5CF6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
     <line x1="38" y1="28" x2="44" y2="28" stroke="#C4B5FD" strokeWidth="2.5" strokeLinecap="round" />
@@ -141,14 +138,10 @@ export const ClayClipboard: React.FC<{ className?: string }> = ({ className = "w
 // 5. 3D Calendar Icon (In Progress 7)
 export const ClayCalendarIcon: React.FC<{ className?: string }> = ({ className = "w-12 h-12" }) => (
   <svg viewBox="0 0 64 64" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Body */}
     <rect x="12" y="14" width="40" height="42" rx="10" fill="#FFF1F2" stroke="#FFE4E6" strokeWidth="1.5" />
-    {/* Top Header */}
     <path d="M12 24C12 18.5 16.5 14 22 14H42C47.5 14 52 18.5 52 24V28H12V24Z" fill="#FDA4AF" />
-    {/* Rings */}
     <rect x="20" y="8" width="4" height="10" rx="2" fill="#FB7185" />
     <rect x="40" y="8" width="4" height="10" rx="2" fill="#FB7185" />
-    {/* Grid Dots */}
     <circle cx="22" cy="36" r="2.5" fill="#F43F5E" />
     <circle cx="32" cy="36" r="2.5" fill="#F43F5E" />
     <circle cx="42" cy="36" r="2.5" fill="#F43F5E" />
@@ -161,11 +154,8 @@ export const ClayCalendarIcon: React.FC<{ className?: string }> = ({ className =
 // 6. 3D Flag Icon (Completed 56)
 export const ClayFlag: React.FC<{ className?: string }> = ({ className = "w-12 h-12" }) => (
   <svg viewBox="0 0 64 64" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Base Stand */}
     <ellipse cx="32" cy="54" rx="10" ry="3.5" fill="#E2E8F0" />
-    {/* Pole */}
     <rect x="23" y="12" width="4" height="42" rx="2" fill="#94A3B8" />
-    {/* Waving Flag */}
     <path 
       d="M27 14C35 12 40 18 52 15V32C40 35 35 29 27 32V14Z" 
       fill="url(#flagGreenGrad)" 
@@ -203,34 +193,20 @@ export const ClayStar: React.FC<{ className?: string }> = ({ className = "w-12 h
 // 8. 3D Bunny with Heart (Bottom Right Motivation Card)
 export const ClayBunnyWithHeart: React.FC<{ className?: string }> = ({ className = "w-20 h-20" }) => (
   <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Body */}
     <ellipse cx="50" cy="68" rx="28" ry="24" fill="#FFFFFF" stroke="#F1F5F9" strokeWidth="2" />
-    
-    {/* Ears with Pink Center */}
     <ellipse cx="36" cy="24" rx="7" ry="18" fill="#FFFFFF" stroke="#F1F5F9" strokeWidth="1.5" />
     <ellipse cx="36" cy="25" rx="4" ry="13" fill="#FBCFE8" />
-
     <ellipse cx="64" cy="24" rx="7" ry="18" fill="#FFFFFF" stroke="#F1F5F9" strokeWidth="1.5" />
     <ellipse cx="64" cy="25" rx="4" ry="13" fill="#FBCFE8" />
-
-    {/* Head */}
     <circle cx="50" cy="50" r="24" fill="#FFFFFF" stroke="#F1F5F9" strokeWidth="2" />
-
-    {/* Eyes */}
     <ellipse cx="42" cy="48" rx="2.5" ry="3.5" fill="#1E293B" />
     <ellipse cx="58" cy="48" rx="2.5" ry="3.5" fill="#1E293B" />
     <circle cx="41" cy="46" r="1" fill="#FFFFFF" />
     <circle cx="57" cy="46" r="1" fill="#FFFFFF" />
-
-    {/* Nose & Mouth */}
     <ellipse cx="50" cy="53" rx="1.5" ry="1" fill="#F472B6" />
     <path d="M47 55Q50 57 53 55" stroke="#64748B" strokeWidth="1.2" strokeLinecap="round" />
-
-    {/* Cheeks */}
     <circle cx="36" cy="54" r="3" fill="#FDA4AF" opacity="0.6" />
     <circle cx="64" cy="54" r="3" fill="#FDA4AF" opacity="0.6" />
-
-    {/* Paws Holding Pink Heart */}
     <path 
       d="M50 78C44 70 34 66 34 58C34 52 38 48 44 48C47 48 49 50 50 52C51 50 53 48 56 48C62 48 66 52 66 58C66 66 56 70 50 78Z" 
       fill="url(#heartGradBunny)" 
@@ -241,7 +217,6 @@ export const ClayBunnyWithHeart: React.FC<{ className?: string }> = ({ className
         <stop offset="1" stopColor="#E11D48" />
       </linearGradient>
     </defs>
-    {/* Tiny white paws over heart */}
     <ellipse cx="36" cy="62" rx="3.5" ry="4" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
     <ellipse cx="64" cy="62" rx="3.5" ry="4" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
   </svg>
@@ -263,7 +238,7 @@ export const BunnyProfileIcon: React.FC<{ className?: string }> = ({ className =
   </svg>
 );
 
-// 10. 3D Project Folders in 4 Colors (Purple, Pink, Green, Yellow)
+// 10. 3D Project Folders in 4 Colors
 export const ClayFolder: React.FC<{ color: 'purple' | 'pink' | 'green' | 'yellow'; className?: string }> = ({
   color,
   className = "w-6 h-6"
@@ -282,3 +257,34 @@ export const ClayFolder: React.FC<{ color: 'purple' | 'pink' | 'green' | 'yellow
     </svg>
   );
 };
+
+// 11. 3D Anti-Scrolling Shield (Signature Feature)
+export const ClayShield: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
+  <svg viewBox="0 0 32 32" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path 
+      d="M16 3L6 7V15C6 21.5 10.3 27.4 16 29C21.7 27.4 26 21.5 26 15V7L16 3Z" 
+      fill="url(#shieldGradClay)" 
+      stroke="#F43F5E" 
+      strokeWidth="1.5" 
+    />
+    <path d="M12 15L15 18L21 12" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <defs>
+      <linearGradient id="shieldGradClay" x1="6" y1="3" x2="26" y2="29" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#FDA4AF" />
+        <stop offset="0.5" stopColor="#FB7185" />
+        <stop offset="1" stopColor="#F43F5E" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+// 12. 3D Return Momentum Steaming Mug (Signature Feature)
+export const ClayZenMug: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
+  <svg viewBox="0 0 32 32" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="10" width="16" height="17" rx="4" fill="#A855F7" />
+    <path d="M22 13C24.5 13 26 14.5 26 17C26 19.5 24.5 21 22 21" stroke="#A855F7" strokeWidth="2" strokeLinecap="round" fill="none" />
+    <path d="M11 6C10 4 13 2 11 0.5" stroke="#E9D5FF" strokeWidth="1.2" strokeLinecap="round" />
+    <path d="M15 7C14 5 17 3 15 1.5" stroke="#E9D5FF" strokeWidth="1.2" strokeLinecap="round" />
+    <circle cx="14" cy="18" r="2" fill="#FDE047" />
+  </svg>
+);

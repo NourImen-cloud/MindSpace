@@ -12,129 +12,122 @@ import {
 
 export const DEFAULT_CATEGORIES: Category[] = [
   {
-    id: 'cat-math',
-    name: 'Mathematics',
+    id: 'cat-university',
+    name: 'University',
     color: '#8B5CF6', // Lilac purple
-    icon: 'Calculator',
-    description: 'Calculus, algebra, problem sets, and theorems'
+    icon: 'GraduationCap',
+    description: 'Coursework, assignments, lecture notes, and exam prep'
   },
   {
-    id: 'cat-bio',
-    name: 'Biology',
-    color: '#10B981', // Mint green
-    icon: 'Leaf',
-    description: 'Cell structure, genetics, lab reviews, and notes'
+    id: 'cat-projects',
+    name: 'Projects',
+    color: '#6366F1', // Electric indigo
+    icon: 'FolderKanban',
+    description: 'Software development, portfolio pieces, and side builds'
   },
   {
-    id: 'cat-history',
-    name: 'History',
-    color: '#F43F5E', // Coral rose
-    icon: 'Landmark',
-    description: 'World history, primary sources, and timelines'
+    id: 'cat-research',
+    name: 'Research',
+    color: '#0EA5E9', // Sky blue
+    icon: 'FlaskConical',
+    description: 'Literature review, empirical data, paper summaries'
   },
   {
-    id: 'cat-physics',
-    name: 'Physics',
-    color: '#6366F1', // Soft electric indigo
-    icon: 'Atom',
-    description: 'Mechanics, electromagnetism, and problem sheets'
-  },
-  {
-    id: 'cat-english',
-    name: 'English & Literature',
-    color: '#F59E0B', // Warm butter amber
+    id: 'cat-learning',
+    name: 'Learning',
+    color: '#F59E0B', // Amber
     icon: 'BookOpen',
-    description: 'Essay writing, reading, and literature analysis'
+    description: 'Self-study, language practice, Anki decks, and books'
   },
   {
-    id: 'cat-wellbeing',
-    name: 'Personal & Rest',
-    color: '#EC4899', // Sakura pink
-    icon: 'Sparkles',
-    description: 'Mindful walks, journaling, meditation, and creative art'
+    id: 'cat-personal',
+    name: 'Personal',
+    color: '#EC4899', // Sakura rose
+    icon: 'Heart',
+    description: 'Hobbies, fitness, mindfulness, cooking, and rest'
   }
 ];
 
 export const INITIAL_TASKS: Task[] = [
   {
     id: 'task-1',
-    title: 'Complete Math: Exercise set 1',
-    description: 'Differential equations and integration by parts exercises 1 through 15.',
-    categoryId: 'cat-math',
+    title: 'Design Landing Page UI & Prototype',
+    description: 'Complete visual wireframes and design system tokens in Figma.',
+    categoryId: 'cat-projects',
     priority: 'P1',
     estimatedMinutes: 45,
     scheduledTime: '09:00 AM',
     scheduledDuration: 45,
     status: 'scheduled',
     createdAt: new Date().toISOString(),
-    tags: ['Exercises', 'Problem Set'],
+    tags: ['Figma', 'UI'],
     energyLevel: 'high'
   },
   {
     id: 'task-2',
-    title: 'Revise Biology Notes: Chapter 4',
-    description: 'Cell structure, organelle functions, and membrane transport summary.',
-    categoryId: 'cat-bio',
+    title: 'Write Project Proposal & Architecture Doc',
+    description: 'Detail system entities, conflict resolution, and offline-first storage.',
+    categoryId: 'cat-projects',
     priority: 'P2',
     estimatedMinutes: 35,
-    scheduledTime: '11:30 AM',
+    scheduledTime: '11:00 AM',
     scheduledDuration: 35,
     status: 'scheduled',
     createdAt: new Date().toISOString(),
-    tags: ['Chapter 4', 'Notes'],
-    energyLevel: 'medium'
+    tags: ['Architecture', 'Docs'],
+    energyLevel: 'high'
   },
   {
     id: 'task-3',
-    title: 'Read History Chapter: The First World War',
-    description: 'Alliance systems, geopolitical triggers, and treaty ramifications.',
-    categoryId: 'cat-history',
+    title: 'Research Competitors & Cognitive Friction Literature',
+    description: 'Collect 3 recent peer-reviewed studies on intentional delays in habit loops.',
+    categoryId: 'cat-research',
     priority: 'P2',
     estimatedMinutes: 30,
     scheduledTime: '02:00 PM',
     scheduledDuration: 30,
     status: 'scheduled',
     createdAt: new Date().toISOString(),
-    tags: ['Read', 'World War I'],
+    tags: ['Literature', 'Paper'],
     energyLevel: 'medium'
   },
   {
     id: 'task-4',
-    title: 'Physics Numericals: Motion in a Straight Line',
-    description: 'Kinematics formulas, displacement vectors, and acceleration curves.',
-    categoryId: 'cat-physics',
+    title: 'Review Machine Learning Chapter 4: Neural Networks',
+    description: 'Prepare notes on backpropagation and attention layer math for university exam.',
+    categoryId: 'cat-university',
     priority: 'P2',
     estimatedMinutes: 40,
-    scheduledTime: '04:30 PM',
+    scheduledTime: '04:00 PM',
     scheduledDuration: 40,
     status: 'scheduled',
     createdAt: new Date().toISOString(),
-    tags: ['Practice', 'Kinematics'],
+    tags: ['Exams', 'Lecture'],
     energyLevel: 'high'
   },
   {
     id: 'task-5',
-    title: 'English Assignment: Literature Essay',
-    description: 'First draft of the comparative thematic essay on character symbolism.',
-    categoryId: 'cat-english',
+    title: 'Practice 20 Minutes Japanese & Spanish Vocabulary',
+    description: 'Complete daily spaced repetition review on Anki without phone interruptions.',
+    categoryId: 'cat-learning',
     priority: 'P3',
-    estimatedMinutes: 45,
+    estimatedMinutes: 20,
     status: 'backlog',
     createdAt: new Date().toISOString(),
-    tags: ['Essay', 'Draft'],
+    tags: ['Language', 'Anki'],
     energyLevel: 'medium'
   },
   {
     id: 'task-6',
     title: 'Afternoon Tea & Desk Spinal Stretch 🍵',
-    description: 'Warm matcha or herbal tea, shoulder rolls, and resting the eyes from screens.',
-    categoryId: 'cat-wellbeing',
+    description: 'Brew warm tea, rest eyes from screen convergence, and stretch upper back.',
+    categoryId: 'cat-personal',
     priority: 'P4',
     estimatedMinutes: 15,
     status: 'completed',
     createdAt: new Date().toISOString(),
     completedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    tags: ['Rest', 'Tea'],
+    tags: ['Wellbeing', 'Rest'],
     energyLevel: 'low'
   }
 ];
@@ -298,7 +291,7 @@ export const INITIAL_DISTRACTION_EVENTS: DistractionEvent[] = [
 ];
 
 export const INITIAL_SETTINGS: UserSettings = {
-  userName: 'Aiko',
+  userName: 'Emily',
   focusPresetMinutes: 25,
   breakDurationMinutes: 5,
   enableSoundEffects: true,
@@ -317,23 +310,23 @@ export const INITIAL_SETTINGS: UserSettings = {
 
 export const INITIAL_MOMENTUM_STATS: ReturnMomentumStats = {
   totalReturns: 14,
-  currentMomentumScore: 85,
-  screenTimeSavedMinutes: 125,
+  currentMomentumScore: 88,
+  screenTimeSavedMinutes: 135,
   mindfulChoicesCount: 19,
   studyStreakDays: 12,
   lastReturnTimestamp: new Date().toISOString()
 };
 
 export const STORAGE_KEYS = {
-  TASKS: 'mindspace_tasks_v2',
-  CATEGORIES: 'mindspace_categories_v2',
-  SESSIONS: 'mindspace_sessions_v2',
-  DISTRACTIONS: 'mindspace_distractions_v2',
-  APP_LIMITS: 'mindspace_limits_v2',
-  ALTERNATIVES: 'mindspace_alternatives_v2',
-  REFLECTIONS: 'mindspace_reflections_v2',
-  SETTINGS: 'mindspace_settings_v2',
-  MOMENTUM: 'mindspace_momentum_v2',
+  TASKS: 'mindspace_tasks_v3',
+  CATEGORIES: 'mindspace_categories_v3',
+  SESSIONS: 'mindspace_sessions_v3',
+  DISTRACTIONS: 'mindspace_distractions_v3',
+  APP_LIMITS: 'mindspace_limits_v3',
+  ALTERNATIVES: 'mindspace_alternatives_v3',
+  REFLECTIONS: 'mindspace_reflections_v3',
+  SETTINGS: 'mindspace_settings_v3',
+  MOMENTUM: 'mindspace_momentum_v3',
 };
 
 // Safe Local-First Storage Helpers
@@ -358,7 +351,7 @@ export function saveToStorage<T>(key: string, value: T): void {
 
 export function exportAllData(): string {
   const data = {
-    version: '2.0.0',
+    version: '3.0.0',
     exportedAt: new Date().toISOString(),
     tasks: loadFromStorage(STORAGE_KEYS.TASKS, INITIAL_TASKS),
     categories: loadFromStorage(STORAGE_KEYS.CATEGORIES, DEFAULT_CATEGORIES),
