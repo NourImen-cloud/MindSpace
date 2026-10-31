@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "MINDSPACE — Anti-Scrolling & Focus Sanctuary",
+  "version": "1.0.0",
+  "description": "Gentle intentional pauses and conscious alternatives before opening distracting websites.",
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

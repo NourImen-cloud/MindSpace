@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MINDSPACE — Intentional Pause</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background: #F7F4EE;
+      color: #1E293B;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border: 1.5px solid #EAE3D2;
+      border-radius: 36px;
+      padding: 40px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 48px rgba(124, 58, 237, 0.08);
+      position: relative;
+    }
+    .badge {
+      display: inline-block;
+      background: #EDE9FE;
+      color: #6D28D9;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      margin-bottom: 24px;
+    }
+    .breathe-ring {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #DDD6FE, #FCE7F3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse 4s infinite ease-in-out;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .breathe-inner {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 4px 12px rgba(109, 40, 217, 0.1);
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(0.9); }
+      50% { transform: scale(1.1); }
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 900;
+      color: #0F172A;
+      margin-bottom: 8px;
+    }
+    p {
+      font-size: 13px;
+      color: #64748B;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 18px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      margin-bottom: 10px;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #8B5CF6, #6366F1);
+      color: white;
+      box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+    }
+    .btn-primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #F1F5F9;
+      color: #334155;
+    }
+    .btn-secondary:hover {
+      background: #E2E8F0;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: #94A3B8;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+    .btn-ghost:hover {
+      color: #475569;
+    }
+    .hidden {
+      display: none;
+    }
+    .reasons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .reason-btn {
+      background: #FAF7F2;
+      border: 1.5px solid #EAE3D2;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .reason-btn:hover {
+      border-color: #8B5CF6;
+      background: #F5F3FF;
+      color: #6D28D9;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <!-- STAGE 1: BREATHING PAUSE -->
+    <div id="stage-pause">
+      <div class="badge">MINDSPACE Intentional Pause ✨</div>
+      
+      <div class="breathe-ring">
+        <div class="breathe-inner">☁️</div>
+      </div>
+
+      <h1 id="title-text">You are reaching for Instagram</h1>
+      <p id="desc-text">
+        Take a slow breath. Notice your impulse before your fingers start scrolling.
+      </p>
+
+      <div id="countdown-btn" class="btn btn-secondary">
+        Pausing for <span id="countdown">5</span>s...
+      </div>
+
+      <button id="proceed-btn" class="btn btn-primary hidden">
+        I am ready to decide →
+      </button>
+    </div>
+
+    <!-- STAGE 2: REASON & GENTLE RETURN -->
+    <div id="stage-choices" class="hidden">
+      <div class="badge">What brought you here? 🌸</div>
+      
+      <h1>Choose with Intention</h1>
+      <p>Acknowledge your current state and pick a nourishing direction.</p>
+
+      <div class="reasons">
+        <button class="reason-btn" onclick="selectReason('Boredom')">🥱 Boredom</button>
+        <button class="reason-btn" onclick="selectReason('Avoiding Task')">😣 Avoiding Study</button>
+        <button class="reason-btn" onclick="selectReason('Habit')">🤖 Habitual Reflex</button>
+        <button class="reason-btn" onclick="selectReason('Need Break')">☕ Need a Break</button>
+      </div>
+
+      <button id="return-sanctuary" class="btn btn-primary">
+        🚀 Return to MINDSPACE Study Sanctuary
+      </button>
+
+      <button id="micro-focus" class="btn btn-secondary">
+        ⏱️ Start 5-Minute Cozy Micro Focus
+      </button>
+
+      <button id="allow-access" class="btn btn-ghost">
+        Continue to <span id="site-name">Instagram</span> for 10 minutes
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const appName = params.get('app') || 'Social Media';
+    const domain = params.get('domain') || 'instagram.com';
+    const targetUrl = params.get('target') || 'https://' + domain;
+
+    document.getElementById('title-text').innerText = 'You are reaching for ' + appName + ' 🌸';
+    document.getElementById('site-name').innerText = appName;
+
+    // Web Audio API Calming Bell Sound
+    function playGentleBell() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(528, audioCtx.currentTime); // 528Hz Solfeggio Love frequency
+        gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 3.0);
+      } catch (e) {}
+    }
+
+    playGentleBell();
+
+    // 5-Second Breathing Countdown
+    let secondsLeft = 5;
+    const countdownEl = document.getElementById('countdown');
+    const countdownBtn = document.getElementById('countdown-btn');
+    const proceedBtn = document.getElementById('proceed-btn');
+
+    const interval = setInterval(() => {
+      secondsLeft--;
+      if (countdownEl) countdownEl.innerText = secondsLeft;
+      if (secondsLeft <= 0) {
+        clearInterval(interval);
+        countdownBtn.classList.add('hidden');
+        proceedBtn.classList.remove('hidden');
+      }
+    }, 1000);
+
+    proceedBtn.addEventListener('click', () => {
+      document.getElementById('stage-pause').classList.add('hidden');
+      document.getElementById('stage-choices').classList.remove('hidden');
+    });
+
+    function selectReason(reason) {
+      // visual feedback
+    }
+
+    // 1. Return to MindSpace Sanctuary
+    document.getElementById('return-sanctuary').addEventListener('click', () => {
+      chrome.storage.local.get(['mindspace_app_url'], (data) => {
+        const appUrl = data.mindspace_app_url || 'http://localhost:4173';
+        window.location.href = appUrl;
+      });
+    });
+
+    // 2. Micro Focus 5m
+    document.getElementById('micro-focus').addEventListener('click', () => {
+      chrome.storage.local.get(['mindspace_app_url'], (data) => {
+        const appUrl = data.mindspace_app_url || 'http://localhost:4173';
+        window.location.href = appUrl + '?focus=5';
+      });
+    });
+
+    // 3. Allow temporary 10-minute access
+    document.getElementById('allow-access').addEventListener('click', () => {
+      chrome.runtime.sendMessage({
+        action: 'allow_temp_access',
+        domain: domain,
+        minutes: 10
+      }, () => {
+        window.location.href = targetUrl;
+      });
+    });
+  </script>
+</body>
+</html>
