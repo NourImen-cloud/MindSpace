@@ -1,37 +1,24 @@
 import React, { useState } from 'react';
 import { 
   Home, 
-  CheckSquare, 
-  FolderKanban, 
   Calendar as CalendarIcon, 
   BarChart2, 
-  MessageSquare, 
-  Users, 
   Settings as SettingsIcon, 
   Search, 
   Bell, 
   ChevronLeft, 
   ChevronRight, 
-  ChevronDown, 
   Plus, 
   Check, 
-  Heart, 
   Clock, 
-  Video, 
   Sparkles,
   ShieldAlert,
   RotateCcw,
   Compass,
-  Bot,
-  Zap,
-  Play,
   Edit2,
   Trash2,
   X,
-  Sliders,
-  CalendarCheck,
-  UserCheck,
-  Flag
+  CalendarCheck
 } from 'lucide-react';
 import { 
   EmilyAvatar, 
@@ -43,9 +30,7 @@ import {
   ClayStar, 
   ClayBunnyWithHeart, 
   BunnyProfileIcon,
-  ClayFolder,
-  ClayShield,
-  ClayZenMug 
+  ClayFolder 
 } from './ClayIcons';
 import { useMindSpace } from '../../store/MindSpaceContext';
 import { AntiScrollingView } from '../features/AntiScrollingView';
@@ -55,7 +40,7 @@ import { FocusModeView } from '../focus/FocusModeView';
 import { AlternativeLibrary } from '../alternatives/AlternativeLibrary';
 import { WeeklyReflectionModal } from '../wellbeing/WeeklyReflectionModal';
 import { SettingsView } from '../settings/SettingsView';
-import { Project, Reminder, Task, Priority, UserProfile } from '../../types';
+import { Project, Task, Priority, UserProfile } from '../../types';
 
 export const EmilyDashboard: React.FC = () => {
   const { 
@@ -69,17 +54,10 @@ export const EmilyDashboard: React.FC = () => {
     addProject,
     updateProject,
     deleteProject,
-    reminders,
-    addReminder,
-    updateReminder,
-    deleteReminder,
     userProfile,
     updateUserProfile,
     openOnboarding,
-    resetToNewUser,
-    triggerDistractionIntercept, 
-    momentum, 
-    appLimits 
+    momentum 
   } = useMindSpace();
 
   const [activeNav, setActiveNav] = useState<string>('dashboard');
@@ -92,13 +70,20 @@ export const EmilyDashboard: React.FC = () => {
   const [chartRange, setChartRange] = useState<'This Week' | 'Last Week' | 'This Month'>('This Week');
   const [activePointIndex, setActivePointIndex] = useState<number>(5); // Sat default
 
+  // Notifications State (Separate from Schedule Modal!)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: '1', title: 'Welcome to MINDSPACE! 💜', time: 'Just now', desc: 'Your personalized focus sanctuary is active.', unread: true },
+    { id: '2', title: 'Anti-Scrolling Shield Active 🛡️', time: '5m ago', desc: 'Intentional pause and habit limits enabled.', unread: true },
+    { id: '3', title: 'Gentle Return Ready 🌸', time: '20m ago', desc: 'Screen time pauses will guide you back to study.', unread: false }
+  ]);
+
   // Modals state for Editability
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: userProfile.name,
     role: userProfile.role,
     subtitle: userProfile.subtitle,
-    quote: userProfile.quote,
     avatarStyle: userProfile.avatarStyle
   });
 
@@ -127,21 +112,6 @@ export const EmilyDashboard: React.FC = () => {
     categoryId: 'cat-projects',
     estimatedMinutes: 30
   });
-
-  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
-  const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
-  const [reminderForm, setReminderForm] = useState<{
-    title: string;
-    timeStr: string;
-    type: Reminder['type'];
-  }>({
-    title: '',
-    timeStr: 'Today, 10:00 AM',
-    type: 'clock'
-  });
-
-  const [isAffirmationModalOpen, setIsAffirmationModalOpen] = useState(false);
-  const [affirmationText, setAffirmationText] = useState(userProfile.quote || "Keep up the good work and don't forget to take care of yourself 💜");
 
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
@@ -177,7 +147,6 @@ export const EmilyDashboard: React.FC = () => {
       name: userProfile.name,
       role: userProfile.role,
       subtitle: userProfile.subtitle,
-      quote: userProfile.quote,
       avatarStyle: userProfile.avatarStyle
     });
     setIsProfileModalOpen(true);
@@ -261,61 +230,29 @@ export const EmilyDashboard: React.FC = () => {
     });
   };
 
-  // Reminder CRUD Handlers
-  const handleOpenAddReminder = () => {
-    setEditingReminder(null);
-    setReminderForm({
-      title: '',
-      timeStr: 'Today, 10:00 AM',
-      type: 'clock'
-    });
-    setIsReminderModalOpen(true);
-  };
-
-  const handleOpenEditReminder = (rem: Reminder) => {
-    setEditingReminder(rem);
-    setReminderForm({
-      title: rem.title,
-      timeStr: rem.timeStr,
-      type: rem.type
-    });
-    setIsReminderModalOpen(true);
-  };
-
-  const handleSaveReminder = () => {
-    if (!reminderForm.title.trim()) return;
-    if (editingReminder) {
-      updateReminder(editingReminder.id, reminderForm);
-    } else {
-      addReminder(reminderForm);
-    }
-    setIsReminderModalOpen(false);
-  };
-
-  // Save Motivation Affirmation
-  const handleSaveAffirmation = () => {
-    updateUserProfile({ quote: affirmationText });
-    setIsAffirmationModalOpen(false);
-  };
-
-  // Computed metrics
-  const completedCount = tasks.filter(t => t.status === 'completed').length;
-  const inProgressCount = tasks.filter(t => t.status === 'scheduled' || t.status === 'in_progress').length;
-  const tasksDoneDisplay = 24 + completedCount;
-  const completedDisplay = 56 + completedCount;
-  const focusTimeDisplay = `${Math.max(18, 18 + Math.floor(momentum.screenTimeSavedMinutes / 60))}h`;
+  // 100% Genuine User Metrics Calculation (NO Static Fake Offsets)
+  const completedTasksCount = tasks.filter(t => t.status === 'completed').length;
+  const inProgressTasksCount = tasks.filter(t => t.status !== 'completed').length;
+  const totalTasksCount = tasks.length;
+  const completedPercentage = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
+  
+  // Real focus minutes logged by this user
+  const focusMinutesTotal = momentum.screenTimeSavedMinutes || 0;
+  const focusHours = Math.floor(focusMinutesTotal / 60);
+  const focusMinutesRem = focusMinutesTotal % 60;
+  const focusTimeDisplay = focusHours > 0 ? `${focusHours}h ${focusMinutesRem}m` : `${focusMinutesRem}m`;
 
   return (
     <div className="min-h-screen bg-[#F7F4EE] text-slate-800 p-3 sm:p-5 lg:p-7 font-['Nunito',sans-serif]">
       <div className="max-w-[1440px] mx-auto flex flex-col lg:flex-row gap-5 items-start">
         
         {/* ========================================================================= */}
-        {/* LEFT SIDEBAR (MINDSPACE Three Pillars + Editable User Profile)            */}
+        {/* LEFT SIDEBAR                                                              */}
         {/* ========================================================================= */}
         <aside className="w-full lg:w-[250px] shrink-0 bg-[#ECE8F8] rounded-[32px] p-4 flex flex-col justify-between gap-5 shadow-sm border border-[#E2DCF2]">
           <div className="space-y-4">
             
-            {/* 1. Emily Profile Avatar Card (Click to Edit!) */}
+            {/* 1. Emily Profile Avatar Card (Click to Edit) */}
             <div 
               onClick={openEditProfile}
               className="group relative flex flex-col items-center text-center cursor-pointer p-2 rounded-3xl hover:bg-white/40 transition-all"
@@ -406,7 +343,7 @@ export const EmilyDashboard: React.FC = () => {
                 </button>
               </div>
 
-              {/* Pillar 2: PRODUCTIVITY */}
+              {/* Pillar 2: PRODUCTIVITY (Categories button removed below smart planner) */}
               <div className="space-y-1">
                 <div className="px-3 text-[9px] font-black uppercase tracking-wider text-purple-700/60">
                   Productivity 📚
@@ -422,18 +359,6 @@ export const EmilyDashboard: React.FC = () => {
                 >
                   <CalendarIcon className="w-4 h-4 text-indigo-600" />
                   <span>Smart Planner</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveNav('tasks')}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all text-left ${
-                    activeNav === 'tasks'
-                      ? 'bg-purple-100 text-purple-900 shadow-xs'
-                      : 'text-slate-600 hover:text-purple-800 hover:bg-white/40'
-                  }`}
-                >
-                  <CheckSquare className="w-4 h-4 text-purple-600" />
-                  <span>5 Categories</span>
                 </button>
               </div>
 
@@ -482,21 +407,12 @@ export const EmilyDashboard: React.FC = () => {
             </nav>
           </div>
 
-          {/* 3. Bottom Plant Encouragement Card (Click to Edit Quote!) */}
-          <div 
-            onClick={() => setIsAffirmationModalOpen(true)}
-            className="group bg-white rounded-2xl p-2.5 shadow-sm border border-purple-50 flex items-center gap-2.5 cursor-pointer hover:border-purple-200 transition-colors"
-            title="Click to edit daily affirmation"
-          >
-            <SmilingPlantPot className="w-10 h-10 shrink-0" />
-            <div className="min-w-0">
-              <p className="text-[10px] font-extrabold text-slate-700 leading-tight truncate">
-                {userProfile.quote || 'Small progress every day adds up to big results 🌱'}
-              </p>
-              <span className="text-[9px] font-black text-purple-600/70 opacity-0 group-hover:opacity-100 transition-opacity">
-                Click to edit
-              </span>
-            </div>
+          {/* 3. Bottom Plant Card */}
+          <div className="bg-white rounded-2xl p-2.5 shadow-sm border border-purple-50 flex items-center gap-2.5">
+            <SmilingPlantPot className="w-9 h-9 shrink-0" />
+            <p className="text-[10px] font-extrabold text-slate-700 leading-tight">
+              Small steps every day lead to meaningful progress 🌱
+            </p>
           </div>
         </aside>
 
@@ -510,7 +426,6 @@ export const EmilyDashboard: React.FC = () => {
           {activeNav === 'focus' && <FocusModeView />}
           {activeNav === 'momentum' && <GentleReturnView />}
           {activeNav === 'planner' && <SmartPlannerView />}
-          {activeNav === 'tasks' && <SmartPlannerView />}
           {activeNav === 'alternatives' && <AlternativeLibrary />}
           {activeNav === 'reflection' && <WeeklyReflectionModal />}
           {activeNav === 'settings' && <SettingsView />}
@@ -519,7 +434,7 @@ export const EmilyDashboard: React.FC = () => {
           {activeNav === 'dashboard' && (
             <div className="space-y-5 animate-fadeIn">
               
-              {/* TOP HEADER: Greeting + Personalize & First-Time Action Buttons */}
+              {/* TOP HEADER: Greeting + Personalize & Actions */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div 
                   onClick={openEditProfile}
@@ -549,7 +464,7 @@ export const EmilyDashboard: React.FC = () => {
                     <span>New User Setup</span>
                   </button>
 
-                  {/* Check Schedule Button */}
+                  {/* Check Schedule Button (Completely Distinct from Notifications!) */}
                   <button
                     onClick={() => setIsScheduleModalOpen(true)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E9E4D8] text-purple-800 text-xs font-black shadow-xs hover:bg-purple-50 transition-all active:scale-95"
@@ -569,16 +484,47 @@ export const EmilyDashboard: React.FC = () => {
                     />
                   </div>
 
-                  {/* Notification Bell */}
-                  <button 
-                    onClick={() => setIsScheduleModalOpen(true)}
-                    className="relative w-8 h-8 rounded-full bg-white border border-[#E9E4D8] flex items-center justify-center text-slate-600 shadow-xs hover:bg-slate-50 transition-colors"
-                  >
-                    <Bell className="w-3.5 h-3.5 fill-slate-500 text-slate-500" />
-                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#F43F5E] text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-xs">
-                      {reminders.length}
-                    </span>
-                  </button>
+                  {/* Notification Bell with Dedicated Dropdown Menu */}
+                  <div className="relative">
+                    <button 
+                      onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                      className="relative w-8 h-8 rounded-full bg-white border border-[#E9E4D8] flex items-center justify-center text-slate-600 shadow-xs hover:bg-slate-50 transition-colors"
+                      title="Notifications"
+                    >
+                      <Bell className="w-3.5 h-3.5 fill-slate-500 text-slate-500" />
+                      {notifications.some(n => n.unread) && (
+                        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#F43F5E] text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-xs">
+                          {notifications.filter(n => n.unread).length}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Independent Notification Dropdown Menu */}
+                    {isNotificationsOpen && (
+                      <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-[#E9E4D8] p-3 z-50 animate-fadeIn space-y-2">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                          <span className="text-xs font-black text-slate-900">Notifications</span>
+                          <button 
+                            onClick={() => setNotifications(prev => prev.map(n => ({ ...n, unread: false })))}
+                            className="text-[10px] font-bold text-purple-600 hover:text-purple-800"
+                          >
+                            Mark all read
+                          </button>
+                        </div>
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                          {notifications.map(n => (
+                            <div key={n.id} className={`p-2 rounded-xl text-xs transition-colors ${n.unread ? 'bg-purple-50/70 border border-purple-100' : 'bg-slate-50'}`}>
+                              <div className="flex items-center justify-between">
+                                <span className="font-black text-slate-800 text-[11px]">{n.title}</span>
+                                <span className="text-[9px] text-slate-400 font-bold">{n.time}</span>
+                              </div>
+                              <p className="text-[10px] text-slate-600 font-medium mt-0.5">{n.desc}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Avatar Profile Button */}
                   <button 
@@ -591,35 +537,7 @@ export const EmilyDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* SIGNATURE QUICK BAR: 1-Click Distraction Interceptor & Focus Launcher */}
-              <div className="p-3 px-4 rounded-[22px] bg-gradient-to-r from-purple-100 via-pink-50 to-indigo-100 border border-purple-200/80 flex flex-wrap items-center justify-between gap-3 text-xs shadow-xs">
-                <div className="flex items-center gap-2 font-black text-purple-900">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
-                  <span>MINDSPACE Shield: Active</span>
-                  <span className="hidden sm:inline font-medium text-purple-700">
-                    • {momentum.totalReturns} mindful returns (+{Math.round(momentum.screenTimeSavedMinutes / 60)}h screen time reclaimed)
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => triggerDistractionIntercept('Instagram')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-rose-600 border border-rose-200 text-xs font-black shadow-xs hover:bg-rose-50 transition-all active:scale-95"
-                  >
-                    <Zap className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
-                    <span>Test Anti-Scroll Intercept 🌸</span>
-                  </button>
-                  <button
-                    onClick={() => startFocusSession(activeTask, 25)}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-black shadow-xs hover:opacity-95 transition-all active:scale-95"
-                  >
-                    <Play className="w-3 h-3 fill-current" />
-                    <span>Focus Sanctuary (25m)</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* ROW 1: 4 Metric Cards (Tasks Done, In Progress, Completed, Focus Time) */}
+              {/* ROW 1: 4 Metric Cards (100% Genuine User Data — NO Static Fake Offsets) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 
                 {/* Card 1: Tasks Done */}
@@ -632,9 +550,9 @@ export const EmilyDashboard: React.FC = () => {
                   </div>
                   <div className="space-y-0.5 min-w-0">
                     <div className="text-xs font-extrabold text-slate-500">Tasks Done</div>
-                    <div className="text-2xl font-black text-slate-900 leading-none">{tasksDoneDisplay}</div>
+                    <div className="text-2xl font-black text-slate-900 leading-none">{completedTasksCount}</div>
                     <div className="text-[10px] font-extrabold text-[#7C3AED]">
-                      +{completedCount} today
+                      {completedTasksCount > 0 ? `${completedTasksCount} completed today` : '0 completed today'}
                     </div>
                   </div>
                 </div>
@@ -649,9 +567,9 @@ export const EmilyDashboard: React.FC = () => {
                   </div>
                   <div className="space-y-0.5 min-w-0">
                     <div className="text-xs font-extrabold text-slate-500">In Progress</div>
-                    <div className="text-2xl font-black text-slate-900 leading-none">{inProgressCount}</div>
+                    <div className="text-2xl font-black text-slate-900 leading-none">{inProgressTasksCount}</div>
                     <div className="text-[10px] font-extrabold text-[#F43F5E]">
-                      {projects.length} projects
+                      {projects.length} {projects.length === 1 ? 'project' : 'projects'}
                     </div>
                   </div>
                 </div>
@@ -666,9 +584,9 @@ export const EmilyDashboard: React.FC = () => {
                   </div>
                   <div className="space-y-0.5 min-w-0">
                     <div className="text-xs font-extrabold text-slate-500">Completed</div>
-                    <div className="text-2xl font-black text-slate-900 leading-none">{completedDisplay}</div>
+                    <div className="text-2xl font-black text-slate-900 leading-none">{completedTasksCount}</div>
                     <div className="text-[10px] font-extrabold text-[#10B981]">
-                      This month
+                      {completedPercentage}% of total tasks
                     </div>
                   </div>
                 </div>
@@ -685,7 +603,7 @@ export const EmilyDashboard: React.FC = () => {
                     <div className="text-xs font-extrabold text-slate-500">Focus Time</div>
                     <div className="text-2xl font-black text-slate-900 leading-none">{focusTimeDisplay}</div>
                     <div className="text-[10px] font-extrabold text-[#D97706]">
-                      +4h from last week
+                      {momentum.totalReturns} mindful returns
                     </div>
                   </div>
                 </div>
@@ -880,36 +798,36 @@ export const EmilyDashboard: React.FC = () => {
 
               </div>
 
-              {/* ROW 3: My Projects (4 cols) | Top Tasks (4 cols) | Reminders & Motivation (4 cols) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5 items-start">
+              {/* ROW 3: My Projects & Top Tasks in a Balanced 2-Column Grid (Sections from photo removed) */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
                 
-                {/* Column 1: My Projects Card (Fully Editable!) */}
-                <div className="xl:col-span-4 bg-white rounded-[28px] p-5 border border-[#ECE6D8] shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-4">
+                {/* Column 1: My Projects Card (Fully Editable) */}
+                <div className="bg-white rounded-[28px] p-5 sm:p-6 border border-[#ECE6D8] shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-black text-slate-900 font-['Quicksand',sans-serif]">My Projects</h3>
                     <div className="flex items-center gap-1.5">
                       <button 
                         onClick={handleOpenAddProject}
-                        className="w-5 h-5 rounded-lg bg-[#8B5CF6] text-white flex items-center justify-center shadow-xs hover:bg-[#7C3AED] transition-colors"
+                        className="w-6 h-6 rounded-lg bg-[#8B5CF6] text-white flex items-center justify-center shadow-xs hover:bg-[#7C3AED] transition-colors"
                         title="Add New Project"
                       >
-                        <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                        <Plus className="w-4 h-4 stroke-[3]" />
                       </button>
                       <button 
                         onClick={() => setActiveNav('planner')}
-                        className="px-2.5 py-0.5 rounded-full bg-[#EDE9FE] text-[#6D28D9] text-[10px] font-black hover:bg-[#DDD6FE] transition-colors"
+                        className="px-2.5 py-1 rounded-full bg-[#EDE9FE] text-[#6D28D9] text-[11px] font-black hover:bg-[#DDD6FE] transition-colors"
                       >
                         View all
                       </button>
                     </div>
                   </div>
 
-                  <div className="space-y-3.5">
+                  <div className="space-y-4">
                     {projects.map(proj => (
                       <div 
                         key={proj.id} 
                         onClick={() => handleOpenEditProject(proj)}
-                        className="group space-y-1 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 transition-colors"
+                        className="group space-y-1.5 cursor-pointer p-2 rounded-xl hover:bg-slate-50 transition-colors"
                         title="Click to edit project name, progress, or color"
                       >
                         <div className="flex items-center justify-between">
@@ -923,10 +841,10 @@ export const EmilyDashboard: React.FC = () => {
                             <span className="text-[11px] font-bold text-slate-500 font-mono">
                               {proj.percent}%
                             </span>
-                            <Edit2 className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <Edit2 className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                           </div>
                         </div>
-                        <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                        <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-500 ${getProjectBarClass(proj.color)}`}
                             style={{ width: `${proj.percent}%` }}
@@ -937,164 +855,90 @@ export const EmilyDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Column 2: Top Tasks Card (Fully Editable!) */}
-                <div className="xl:col-span-4 bg-white rounded-[28px] p-5 border border-[#ECE6D8] shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-4">
+                {/* Column 2: Top Tasks Card (Fully Editable) */}
+                <div className="bg-white rounded-[28px] p-5 sm:p-6 border border-[#ECE6D8] shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-black text-slate-900 font-['Quicksand',sans-serif]">Top Tasks</h3>
                     <div className="flex items-center gap-1.5">
                       <button 
                         onClick={handleOpenAddTask}
-                        className="w-5 h-5 rounded-lg bg-[#22C55E] text-white flex items-center justify-center shadow-xs hover:bg-[#16A34A] transition-colors"
+                        className="w-6 h-6 rounded-lg bg-[#22C55E] text-white flex items-center justify-center shadow-xs hover:bg-[#16A34A] transition-colors"
                         title="Add New Task"
                       >
-                        <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                        <Plus className="w-4 h-4 stroke-[3]" />
                       </button>
                       <button 
-                        onClick={() => setActiveNav('tasks')}
-                        className="px-2.5 py-0.5 rounded-full bg-[#DCFCE7] text-[#15803D] text-[10px] font-black hover:bg-[#BBF7D0] transition-colors"
+                        onClick={() => setActiveNav('planner')}
+                        className="px-2.5 py-1 rounded-full bg-[#DCFCE7] text-[#15803D] text-[11px] font-black hover:bg-[#BBF7D0] transition-colors"
                       >
                         View all
                       </button>
                     </div>
                   </div>
 
-                  <div className="space-y-2.5">
-                    {tasks.slice(0, 5).map(task => {
-                      const isCompleted = task.status === 'completed';
-                      const badgeColor = {
-                        P1: 'bg-[#FEECEE] text-[#E11D48]',
-                        P2: 'bg-[#FEF6E8] text-[#D97706]',
-                        P3: 'bg-[#EFF6FF] text-[#2563EB]',
-                        P4: 'bg-slate-100 text-slate-600'
-                      }[task.priority] || 'bg-slate-100 text-slate-600';
+                  <div className="space-y-3">
+                    {tasks.length === 0 ? (
+                      <div className="text-center py-8 text-xs text-slate-400 font-bold">
+                        No tasks yet. Click + to add your first task!
+                      </div>
+                    ) : (
+                      tasks.slice(0, 6).map(task => {
+                        const isCompleted = task.status === 'completed';
+                        const badgeColor = {
+                          P1: 'bg-[#FEECEE] text-[#E11D48]',
+                          P2: 'bg-[#FEF6E8] text-[#D97706]',
+                          P3: 'bg-[#EFF6FF] text-[#2563EB]',
+                          P4: 'bg-slate-100 text-slate-600'
+                        }[task.priority] || 'bg-slate-100 text-slate-600';
 
-                      const priorityLabel = {
-                        P1: 'High',
-                        P2: 'Medium',
-                        P3: 'Low',
-                        P4: 'Low'
-                      }[task.priority] || 'Medium';
+                        const priorityLabel = {
+                          P1: 'High',
+                          P2: 'Medium',
+                          P3: 'Low',
+                          P4: 'Low'
+                        }[task.priority] || 'Medium';
 
-                      return (
-                        <div
-                          key={task.id}
-                          className="group flex items-center justify-between gap-2 p-1.5 rounded-xl hover:bg-slate-50 transition-colors"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                            <button
-                              onClick={() => handleToggleTaskStatus(task)}
-                              className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 transition-colors ${
-                                isCompleted ? 'bg-[#22C55E]' : 'border-2 border-slate-300 bg-white hover:border-purple-400'
-                              }`}
-                            >
-                              {isCompleted && <Check className="w-3 h-3 text-white stroke-[3]" />}
-                            </button>
-                            <span 
-                              onClick={() => handleOpenEditTask(task)}
-                              className={`text-xs font-bold truncate cursor-pointer hover:text-purple-700 transition-colors ${
-                                isCompleted ? 'line-through text-slate-400' : 'text-slate-800'
-                              }`}
-                              title="Click to edit task title or priority"
-                            >
-                              {task.title}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}`}>
-                              {priorityLabel}
-                            </span>
-                            <button
-                              onClick={() => handleOpenEditTask(task)}
-                              className="text-slate-400 hover:text-purple-700 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <Edit2 className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Column 3: Upcoming Reminders & Motivation Card Stack (Fully Editable!) */}
-                <div className="xl:col-span-4 space-y-4">
-                  
-                  {/* Top: Upcoming Reminders Card */}
-                  <div className="bg-white rounded-[28px] p-5 border border-[#ECE6D8] shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-3.5">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-black text-slate-900 font-['Quicksand',sans-serif]">Upcoming Reminders</h3>
-                      <button 
-                        onClick={handleOpenAddReminder}
-                        className="w-5 h-5 rounded-lg bg-[#FB7185] text-white flex items-center justify-center shadow-xs hover:bg-[#F43F5E] transition-colors"
-                        title="Add New Reminder"
-                      >
-                        <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                      </button>
-                    </div>
-
-                    <div className="space-y-3">
-                      {reminders.map(rem => {
                         return (
-                          <div 
-                            key={rem.id} 
-                            onClick={() => handleOpenEditReminder(rem)}
-                            className="group flex items-center justify-between gap-2 p-1 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
-                            title="Click to edit reminder"
+                          <div
+                            key={task.id}
+                            className="group flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-slate-50 transition-colors"
                           >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                                rem.type === 'clock' ? 'bg-[#FFE4E6] text-[#F43F5E]' :
-                                rem.type === 'video' ? 'bg-[#E0F2FE] text-[#0284C7]' :
-                                rem.type === 'flag' ? 'bg-emerald-100 text-emerald-700' :
-                                'bg-[#FEF3C7] text-[#D97706]'
-                              }`}>
-                                {rem.type === 'clock' && <Clock className="w-4 h-4 stroke-[2.5]" />}
-                                {rem.type === 'video' && <Video className="w-4 h-4 stroke-[2.5]" />}
-                                {rem.type === 'flag' && <Flag className="w-4 h-4 stroke-[2.5]" />}
-                                {rem.type === 'bell' && <Bell className="w-4 h-4 fill-amber-500 text-amber-500" />}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="text-xs font-black text-slate-900 truncate group-hover:text-purple-700 transition-colors">
-                                  {rem.title}
-                                </div>
-                                <div className="text-[10px] font-bold text-slate-400">{rem.timeStr}</div>
-                              </div>
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                              <button
+                                onClick={() => handleToggleTaskStatus(task)}
+                                className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                                  isCompleted ? 'bg-[#22C55E]' : 'border-2 border-slate-300 bg-white hover:border-purple-400'
+                                }`}
+                              >
+                                {isCompleted && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                              </button>
+                              <span 
+                                onClick={() => handleOpenEditTask(task)}
+                                className={`text-xs font-bold truncate cursor-pointer hover:text-purple-700 transition-colors ${
+                                  isCompleted ? 'line-through text-slate-400' : 'text-slate-800'
+                                }`}
+                                title="Click to edit task title or priority"
+                              >
+                                {task.title}
+                              </span>
                             </div>
 
-                            <Edit2 className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}`}>
+                                {priorityLabel}
+                              </span>
+                              <button
+                                onClick={() => handleOpenEditTask(task)}
+                                className="text-slate-400 hover:text-purple-700 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
                         );
-                      })}
-                    </div>
+                      })
+                    )}
                   </div>
-
-                  {/* Bottom: Motivation Bunny Card (Click to Edit Affirmation!) */}
-                  <div 
-                    onClick={() => setIsAffirmationModalOpen(true)}
-                    className="group relative overflow-hidden bg-[#ECE8F8] rounded-[28px] p-5 border border-[#DDD6FE] shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md transition-shadow"
-                    title="Click to edit your motivational affirmation"
-                  >
-                    <span className="absolute top-2 right-12 text-xs text-amber-300">⭐</span>
-                    <span className="absolute bottom-3 left-28 text-xs text-amber-300">⭐</span>
-
-                    <div className="space-y-1 max-w-[190px] relative z-10">
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="text-xs font-black text-[#5B21B6] leading-snug">
-                          You're doing amazing, {userProfile.name}!
-                        </h4>
-                        <Edit2 className="w-3 h-3 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-                      </div>
-                      <p className="text-[10px] font-bold text-[#6D28D9]/80 leading-relaxed">
-                        {userProfile.quote || "Keep up the good work and don't forget to take care of yourself 💜"}
-                      </p>
-                    </div>
-
-                    <div className="relative z-10 -mr-2 shrink-0">
-                      <ClayBunnyWithHeart className="w-18 h-18" />
-                    </div>
-                  </div>
-
                 </div>
 
               </div>
@@ -1398,158 +1242,7 @@ export const EmilyDashboard: React.FC = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* EDIT MODAL 4: Reminder Editor (Add/Edit/Delete)                            */}
-      {/* ========================================================================= */}
-      {isReminderModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-md bg-[#F7F4EE] rounded-[32px] border border-[#E9E4D8] shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-900">
-                {editingReminder ? 'Edit Reminder' : 'Add Reminder'}
-              </h3>
-              <button 
-                onClick={() => setIsReminderModalOpen(false)}
-                className="p-1 rounded-full text-slate-400 hover:text-slate-700"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-black text-slate-700 block mb-1">Reminder Title</label>
-                <input
-                  type="text"
-                  value={reminderForm.title}
-                  onChange={e => setReminderForm(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="e.g. Team stand-up"
-                  className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-black text-slate-700 block mb-1">Scheduled Time String</label>
-                <input
-                  type="text"
-                  value={reminderForm.timeStr}
-                  onChange={e => setReminderForm(prev => ({ ...prev, timeStr: e.target.value }))}
-                  placeholder="e.g. Today, 10:00 AM"
-                  className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-black text-slate-700 block mb-1">Reminder Type Icon</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {[
-                    { id: 'clock', label: 'Standup', icon: <Clock className="w-4 h-4" /> },
-                    { id: 'video', label: 'Call', icon: <Video className="w-4 h-4" /> },
-                    { id: 'bell', label: 'Alert', icon: <Bell className="w-4 h-4" /> },
-                    { id: 'flag', label: 'Goal', icon: <Flag className="w-4 h-4" /> },
-                  ].map(item => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setReminderForm(prev => ({ ...prev, type: item.id as any }))}
-                      className={`p-2.5 rounded-xl text-xs font-bold border flex flex-col items-center gap-1 transition-all ${
-                        reminderForm.type === item.id
-                          ? 'border-purple-600 bg-purple-100 text-purple-900 shadow-xs'
-                          : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      {item.icon}
-                      <span className="text-[10px]">{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2">
-              {editingReminder ? (
-                <button
-                  onClick={() => {
-                    deleteReminder(editingReminder.id);
-                    setIsReminderModalOpen(false);
-                  }}
-                  className="flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Delete</span>
-                </button>
-              ) : <div />}
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsReminderModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveReminder}
-                  className="px-5 py-2 bg-[#FB7185] hover:bg-[#F43F5E] text-white rounded-xl text-xs font-black shadow-xs transition-all"
-                >
-                  {editingReminder ? 'Save Reminder' : 'Add Reminder'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* EDIT MODAL 5: Affirmation / Motivation Editor                             */}
-      {/* ========================================================================= */}
-      {isAffirmationModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-md bg-[#F7F4EE] rounded-[32px] border border-[#E9E4D8] shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-900 flex items-center gap-1.5">
-                <Heart className="w-4 h-4 text-pink-500 fill-pink-500" />
-                <span>Daily Affirmation</span>
-              </h3>
-              <button 
-                onClick={() => setIsAffirmationModalOpen(false)}
-                className="p-1 rounded-full text-slate-400 hover:text-slate-700"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div>
-              <label className="text-xs font-black text-slate-700 block mb-1">
-                Personal Motivation Message
-              </label>
-              <textarea
-                rows={3}
-                value={affirmationText}
-                onChange={e => setAffirmationText(e.target.value)}
-                placeholder="Keep up the good work and remember to take care of yourself 💜"
-                className="w-full bg-white border border-[#E9E4D8] rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                onClick={() => setIsAffirmationModalOpen(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveAffirmation}
-                className="px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-xl text-xs font-black shadow-xs transition-all"
-              >
-                Update Affirmation
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* SCHEDULE CHECK MODAL: Check & Review Daily Schedule Timeline              */}
+      {/* SCHEDULE CHECK MODAL: Dedicated Daily Schedule Timeline                   */}
       {/* ========================================================================= */}
       {isScheduleModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
@@ -1571,28 +1264,34 @@ export const EmilyDashboard: React.FC = () => {
 
             {/* Daily Schedule Timeline List */}
             <div className="space-y-3">
-              {[
-                { time: '09:00 AM', title: tasks[0]?.title || 'Design Landing Page UI', tag: 'Deep Focus', duration: '45m', color: 'bg-purple-100 text-purple-800 border-purple-200' },
-                { time: '10:00 AM', title: reminders[0]?.title || 'Team stand-up', tag: 'Meeting', duration: '20m', color: 'bg-rose-100 text-rose-800 border-rose-200' },
-                { time: '10:30 AM', title: 'Intentional Pause: 5m tea & stretch 🍵', tag: 'Break', duration: '15m', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-                { time: '11:00 AM', title: tasks[1]?.title || 'Write Project Proposal', tag: 'Focus', duration: '35m', color: 'bg-purple-100 text-purple-800 border-purple-200' },
-                { time: '01:00 PM', title: 'Mindful lunch break & sunlight walk', tag: 'Rest', duration: '60m', color: 'bg-amber-100 text-amber-800 border-amber-200' },
-                { time: '02:30 PM', title: reminders[1]?.title || 'Client presentation', tag: 'Call', duration: '30m', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-                { time: '03:30 PM', title: tasks[2]?.title || 'Research competitors', tag: 'Deep Focus', duration: '40m', color: 'bg-purple-100 text-purple-800 border-purple-200' },
-              ].map((slot, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-[#EAE3D2] shadow-2xs">
-                  <span className="text-xs font-mono font-black text-purple-700 w-20 shrink-0">
-                    {slot.time}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-800 truncate">{slot.title}</p>
-                    <span className="text-[10px] text-slate-400 font-bold">{slot.duration} duration</span>
-                  </div>
-                  <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border shrink-0 ${slot.color}`}>
-                    {slot.tag}
-                  </span>
+              {tasks.length === 0 ? (
+                <div className="text-center py-8 text-xs text-slate-500 font-bold">
+                  No scheduled tasks yet for today. Use the Smart Planner or + Top Tasks to add your focus plan!
                 </div>
-              ))}
+              ) : (
+                tasks.map((task, i) => {
+                  const hour = 9 + Math.floor(i * 1.5);
+                  const timeFormatted = `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
+                  return (
+                    <div key={task.id} className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-[#EAE3D2] shadow-2xs">
+                      <span className="text-xs font-mono font-black text-purple-700 w-20 shrink-0">
+                        {task.scheduledTime || timeFormatted}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-bold truncate ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                          {task.title}
+                        </p>
+                        <span className="text-[10px] text-slate-400 font-bold">{task.estimatedMinutes}m duration</span>
+                      </div>
+                      <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border shrink-0 ${
+                        task.status === 'completed' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-purple-100 text-purple-800 border-purple-200'
+                      }`}>
+                        {task.status === 'completed' ? 'Completed' : 'Focus'}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-slate-200">

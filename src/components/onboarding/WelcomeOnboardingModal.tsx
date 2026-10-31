@@ -297,19 +297,6 @@ export const WelcomeOnboardingModal: React.FC = () => {
                     className="w-full bg-[#FAF7F2] border border-[#E5DECD] rounded-2xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-purple-400 focus:bg-white transition-all"
                   />
                 </div>
-
-                <div>
-                  <label className="text-xs font-black text-slate-700 block mb-1">
-                    Daily Mantra / Motivation Quote
-                  </label>
-                  <input
-                    type="text"
-                    value={quote}
-                    onChange={e => setQuote(e.target.value)}
-                    placeholder="e.g. Small progress every day adds up to big results 🌱"
-                    className="w-full bg-[#FAF7F2] border border-[#E5DECD] rounded-2xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-purple-400 focus:bg-white transition-all"
-                  />
-                </div>
               </div>
             </div>
           )}
