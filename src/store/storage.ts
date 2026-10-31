@@ -7,7 +7,10 @@ import {
   AlternativeActivity, 
   WeeklyReflection, 
   UserSettings, 
-  ReturnMomentumStats 
+  ReturnMomentumStats,
+  Project,
+  Reminder,
+  UserProfile
 } from '../types';
 
 export const DEFAULT_CATEGORIES: Category[] = [
@@ -308,6 +311,28 @@ export const INITIAL_SETTINGS: UserSettings = {
   viewMode: 'desktop'
 };
 
+export const INITIAL_PROJECTS: Project[] = [
+  { id: 'proj-1', name: 'Website Redesign', percent: 75, color: 'purple', categoryId: 'cat-projects' },
+  { id: 'proj-2', name: 'Marketing Campaign', percent: 60, color: 'pink', categoryId: 'cat-projects' },
+  { id: 'proj-3', name: 'Mobile App', percent: 40, color: 'green', categoryId: 'cat-projects' },
+  { id: 'proj-4', name: 'User Research', percent: 90, color: 'yellow', categoryId: 'cat-research' },
+];
+
+export const INITIAL_REMINDERS: Reminder[] = [
+  { id: 'rem-1', title: 'Team stand-up', timeStr: 'Today, 10:00 AM', type: 'clock' },
+  { id: 'rem-2', title: 'Client presentation', timeStr: 'Tomorrow, 2:30 PM', type: 'video' },
+  { id: 'rem-3', title: 'Submit report', timeStr: 'May 17, 11:59 PM', type: 'bell' },
+];
+
+export const INITIAL_USER_PROFILE: UserProfile = {
+  name: 'Emily',
+  role: 'Productivity & Focus Explorer',
+  subtitle: "Let's make today productive and amazing!",
+  quote: "Small progress every day adds up to big results 🌱",
+  avatarStyle: 'emily',
+  hasCompletedOnboarding: false,
+};
+
 export const INITIAL_MOMENTUM_STATS: ReturnMomentumStats = {
   totalReturns: 14,
   currentMomentumScore: 88,
@@ -318,15 +343,18 @@ export const INITIAL_MOMENTUM_STATS: ReturnMomentumStats = {
 };
 
 export const STORAGE_KEYS = {
-  TASKS: 'mindspace_tasks_v3',
-  CATEGORIES: 'mindspace_categories_v3',
-  SESSIONS: 'mindspace_sessions_v3',
-  DISTRACTIONS: 'mindspace_distractions_v3',
-  APP_LIMITS: 'mindspace_limits_v3',
-  ALTERNATIVES: 'mindspace_alternatives_v3',
-  REFLECTIONS: 'mindspace_reflections_v3',
-  SETTINGS: 'mindspace_settings_v3',
-  MOMENTUM: 'mindspace_momentum_v3',
+  TASKS: 'mindspace_tasks_v4',
+  CATEGORIES: 'mindspace_categories_v4',
+  SESSIONS: 'mindspace_sessions_v4',
+  DISTRACTIONS: 'mindspace_distractions_v4',
+  APP_LIMITS: 'mindspace_limits_v4',
+  ALTERNATIVES: 'mindspace_alternatives_v4',
+  REFLECTIONS: 'mindspace_reflections_v4',
+  SETTINGS: 'mindspace_settings_v4',
+  MOMENTUM: 'mindspace_momentum_v4',
+  PROJECTS: 'mindspace_projects_v4',
+  REMINDERS: 'mindspace_reminders_v4',
+  USER_PROFILE: 'mindspace_profile_v4',
 };
 
 // Safe Local-First Storage Helpers
@@ -351,7 +379,7 @@ export function saveToStorage<T>(key: string, value: T): void {
 
 export function exportAllData(): string {
   const data = {
-    version: '3.0.0',
+    version: '4.0.0',
     exportedAt: new Date().toISOString(),
     tasks: loadFromStorage(STORAGE_KEYS.TASKS, INITIAL_TASKS),
     categories: loadFromStorage(STORAGE_KEYS.CATEGORIES, DEFAULT_CATEGORIES),
@@ -362,6 +390,9 @@ export function exportAllData(): string {
     reflections: loadFromStorage(STORAGE_KEYS.REFLECTIONS, []),
     settings: loadFromStorage(STORAGE_KEYS.SETTINGS, INITIAL_SETTINGS),
     momentum: loadFromStorage(STORAGE_KEYS.MOMENTUM, INITIAL_MOMENTUM_STATS),
+    projects: loadFromStorage(STORAGE_KEYS.PROJECTS, INITIAL_PROJECTS),
+    reminders: loadFromStorage(STORAGE_KEYS.REMINDERS, INITIAL_REMINDERS),
+    userProfile: loadFromStorage(STORAGE_KEYS.USER_PROFILE, INITIAL_USER_PROFILE),
   };
   return JSON.stringify(data, null, 2);
 }
@@ -378,6 +409,9 @@ export function importAllData(jsonString: string): boolean {
     if (data.reflections) saveToStorage(STORAGE_KEYS.REFLECTIONS, data.reflections);
     if (data.settings) saveToStorage(STORAGE_KEYS.SETTINGS, data.settings);
     if (data.momentum) saveToStorage(STORAGE_KEYS.MOMENTUM, data.momentum);
+    if (data.projects) saveToStorage(STORAGE_KEYS.PROJECTS, data.projects);
+    if (data.reminders) saveToStorage(STORAGE_KEYS.REMINDERS, data.reminders);
+    if (data.userProfile) saveToStorage(STORAGE_KEYS.USER_PROFILE, data.userProfile);
     return true;
   } catch (e) {
     console.error('Import failed:', e);

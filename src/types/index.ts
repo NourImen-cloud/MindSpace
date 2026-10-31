@@ -123,6 +123,32 @@ export interface UserSettings {
   viewMode: 'desktop' | 'mobile_preview' | 'showcase';
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  percent: number; // 0 - 100
+  color: 'purple' | 'pink' | 'green' | 'yellow' | 'blue' | 'rose';
+  categoryId?: string;
+  description?: string;
+}
+
+export interface Reminder {
+  id: string;
+  title: string;
+  timeStr: string;
+  type: 'clock' | 'video' | 'bell' | 'flag';
+}
+
+export interface UserProfile {
+  name: string;
+  role: string;
+  subtitle: string;
+  quote: string;
+  avatarStyle: 'emily' | 'bunny' | 'plant' | 'bear' | 'student';
+  customAvatarUrl?: string;
+  hasCompletedOnboarding: boolean;
+}
+
 export interface ReturnMomentumStats {
   totalReturns: number;
   currentMomentumScore: number;

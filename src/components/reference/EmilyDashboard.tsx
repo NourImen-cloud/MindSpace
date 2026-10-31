@@ -24,7 +24,14 @@ import {
   Compass,
   Bot,
   Zap,
-  Play
+  Play,
+  Edit2,
+  Trash2,
+  X,
+  Sliders,
+  CalendarCheck,
+  UserCheck,
+  Flag
 } from 'lucide-react';
 import { 
   EmilyAvatar, 
@@ -48,52 +55,289 @@ import { FocusModeView } from '../focus/FocusModeView';
 import { AlternativeLibrary } from '../alternatives/AlternativeLibrary';
 import { WeeklyReflectionModal } from '../wellbeing/WeeklyReflectionModal';
 import { SettingsView } from '../settings/SettingsView';
+import { Project, Reminder, Task, Priority, UserProfile } from '../../types';
 
 export const EmilyDashboard: React.FC = () => {
   const { 
     startFocusSession, 
     tasks, 
+    addTask,
+    updateTask,
+    deleteTask,
+    categories,
+    projects,
+    addProject,
+    updateProject,
+    deleteProject,
+    reminders,
+    addReminder,
+    updateReminder,
+    deleteReminder,
+    userProfile,
+    updateUserProfile,
+    openOnboarding,
+    resetToNewUser,
     triggerDistractionIntercept, 
     momentum, 
     appLimits 
   } = useMindSpace();
 
   const [activeNav, setActiveNav] = useState<string>('dashboard');
-  const [taskState, setTaskState] = useState([
-    { id: 1, title: 'Design landing page', priority: 'High', checked: true },
-    { id: 2, title: 'Write project proposal', priority: 'Medium', checked: true },
-    { id: 3, title: 'Research competitors', priority: 'Low', checked: false },
-    { id: 4, title: 'Update style guide', priority: 'Low', checked: false },
-    { id: 5, title: 'Review analytics', priority: 'Medium', checked: false },
-  ]);
 
-  const toggleTask = (id: number) => {
-    setTaskState(prev => prev.map(t => t.id === id ? { ...t, checked: !t.checked } : t));
+  // Interactive Calendar Selection
+  const [selectedDay, setSelectedDay] = useState<number>(15);
+  const [calendarMonth, setCalendarMonth] = useState('May 2024');
+
+  // Interactive Chart Range Selector
+  const [chartRange, setChartRange] = useState<'This Week' | 'Last Week' | 'This Month'>('This Week');
+  const [activePointIndex, setActivePointIndex] = useState<number>(5); // Sat default
+
+  // Modals state for Editability
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: userProfile.name,
+    role: userProfile.role,
+    subtitle: userProfile.subtitle,
+    quote: userProfile.quote,
+    avatarStyle: userProfile.avatarStyle
+  });
+
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [projectForm, setProjectForm] = useState<{
+    name: string;
+    percent: number;
+    color: Project['color'];
+  }>({
+    name: '',
+    percent: 50,
+    color: 'purple'
+  });
+
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [taskForm, setTaskForm] = useState<{
+    title: string;
+    priority: Priority;
+    categoryId: string;
+    estimatedMinutes: number;
+  }>({
+    title: '',
+    priority: 'P2',
+    categoryId: 'cat-projects',
+    estimatedMinutes: 30
+  });
+
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+  const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
+  const [reminderForm, setReminderForm] = useState<{
+    title: string;
+    timeStr: string;
+    type: Reminder['type'];
+  }>({
+    title: '',
+    timeStr: 'Today, 10:00 AM',
+    type: 'clock'
+  });
+
+  const [isAffirmationModalOpen, setIsAffirmationModalOpen] = useState(false);
+  const [affirmationText, setAffirmationText] = useState(userProfile.quote || "Keep up the good work and don't forget to take care of yourself 💜");
+
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+
+  // Active Task for Focus Sanctuary
+  const activeTask = tasks.find(t => t.status === 'scheduled') || tasks[0];
+
+  // Companion Avatar Component Renderer
+  const renderAvatar = (style?: UserProfile['avatarStyle'], size = 'w-32 h-32') => {
+    switch (style) {
+      case 'bunny': return <ClayBunnyWithHeart className={size} />;
+      case 'plant': return <SmilingPlantPot className={size} />;
+      case 'bear': return <BunnyProfileIcon className={size} />;
+      default: return <EmilyAvatar className={size} />;
+    }
   };
 
-  const activeTask = tasks.find(t => t.status === 'scheduled') || tasks[0];
+  // Color mapping helper for project folders
+  const getProjectBarClass = (color: Project['color']) => {
+    switch (color) {
+      case 'purple': return 'bg-[#8B5CF6]';
+      case 'pink': return 'bg-[#FB7185]';
+      case 'green': return 'bg-[#4ADE80]';
+      case 'yellow': return 'bg-[#FACC15]';
+      case 'blue': return 'bg-[#38BDF8]';
+      case 'rose': return 'bg-[#F43F5E]';
+      default: return 'bg-[#8B5CF6]';
+    }
+  };
+
+  // Profile Edit Handlers
+  const openEditProfile = () => {
+    setProfileForm({
+      name: userProfile.name,
+      role: userProfile.role,
+      subtitle: userProfile.subtitle,
+      quote: userProfile.quote,
+      avatarStyle: userProfile.avatarStyle
+    });
+    setIsProfileModalOpen(true);
+  };
+
+  const handleSaveProfile = () => {
+    updateUserProfile(profileForm);
+    setIsProfileModalOpen(false);
+  };
+
+  // Project CRUD Handlers
+  const handleOpenAddProject = () => {
+    setEditingProject(null);
+    setProjectForm({ name: '', percent: 50, color: 'purple' });
+    setIsProjectModalOpen(true);
+  };
+
+  const handleOpenEditProject = (proj: Project) => {
+    setEditingProject(proj);
+    setProjectForm({
+      name: proj.name,
+      percent: proj.percent,
+      color: proj.color
+    });
+    setIsProjectModalOpen(true);
+  };
+
+  const handleSaveProject = () => {
+    if (!projectForm.name.trim()) return;
+    if (editingProject) {
+      updateProject(editingProject.id, projectForm);
+    } else {
+      addProject(projectForm);
+    }
+    setIsProjectModalOpen(false);
+  };
+
+  // Task CRUD Handlers
+  const handleOpenAddTask = () => {
+    setEditingTask(null);
+    setTaskForm({
+      title: '',
+      priority: 'P2',
+      categoryId: categories[0]?.id || 'cat-projects',
+      estimatedMinutes: 30
+    });
+    setIsTaskModalOpen(true);
+  };
+
+  const handleOpenEditTask = (task: Task) => {
+    setEditingTask(task);
+    setTaskForm({
+      title: task.title,
+      priority: task.priority,
+      categoryId: task.categoryId,
+      estimatedMinutes: task.estimatedMinutes
+    });
+    setIsTaskModalOpen(true);
+  };
+
+  const handleSaveTask = () => {
+    if (!taskForm.title.trim()) return;
+    if (editingTask) {
+      updateTask(editingTask.id, taskForm);
+    } else {
+      addTask({
+        ...taskForm,
+        status: 'scheduled',
+        scheduledTime: '09:00 AM',
+        scheduledDuration: taskForm.estimatedMinutes
+      });
+    }
+    setIsTaskModalOpen(false);
+  };
+
+  const handleToggleTaskStatus = (task: Task) => {
+    const isCompleted = task.status === 'completed';
+    updateTask(task.id, {
+      status: isCompleted ? 'scheduled' : 'completed',
+      completedAt: isCompleted ? undefined : new Date().toISOString()
+    });
+  };
+
+  // Reminder CRUD Handlers
+  const handleOpenAddReminder = () => {
+    setEditingReminder(null);
+    setReminderForm({
+      title: '',
+      timeStr: 'Today, 10:00 AM',
+      type: 'clock'
+    });
+    setIsReminderModalOpen(true);
+  };
+
+  const handleOpenEditReminder = (rem: Reminder) => {
+    setEditingReminder(rem);
+    setReminderForm({
+      title: rem.title,
+      timeStr: rem.timeStr,
+      type: rem.type
+    });
+    setIsReminderModalOpen(true);
+  };
+
+  const handleSaveReminder = () => {
+    if (!reminderForm.title.trim()) return;
+    if (editingReminder) {
+      updateReminder(editingReminder.id, reminderForm);
+    } else {
+      addReminder(reminderForm);
+    }
+    setIsReminderModalOpen(false);
+  };
+
+  // Save Motivation Affirmation
+  const handleSaveAffirmation = () => {
+    updateUserProfile({ quote: affirmationText });
+    setIsAffirmationModalOpen(false);
+  };
+
+  // Computed metrics
+  const completedCount = tasks.filter(t => t.status === 'completed').length;
+  const inProgressCount = tasks.filter(t => t.status === 'scheduled' || t.status === 'in_progress').length;
+  const tasksDoneDisplay = 24 + completedCount;
+  const completedDisplay = 56 + completedCount;
+  const focusTimeDisplay = `${Math.max(18, 18 + Math.floor(momentum.screenTimeSavedMinutes / 60))}h`;
 
   return (
     <div className="min-h-screen bg-[#F7F4EE] text-slate-800 p-3 sm:p-5 lg:p-7 font-['Nunito',sans-serif]">
       <div className="max-w-[1440px] mx-auto flex flex-col lg:flex-row gap-5 items-start">
         
         {/* ========================================================================= */}
-        {/* LEFT SIDEBAR (Organized around MINDSPACE Three Pillars & Signature)        */}
+        {/* LEFT SIDEBAR (MINDSPACE Three Pillars + Editable User Profile)            */}
         {/* ========================================================================= */}
         <aside className="w-full lg:w-[250px] shrink-0 bg-[#ECE8F8] rounded-[32px] p-4 flex flex-col justify-between gap-5 shadow-sm border border-[#E2DCF2]">
           <div className="space-y-4">
-            {/* 1. Emily Profile Avatar Card */}
-            <div className="flex flex-col items-center text-center">
-              <div className="w-full bg-white rounded-[26px] p-2.5 shadow-[0_4px_16px_rgba(139,92,246,0.06)] flex items-center justify-center">
-                <EmilyAvatar className="w-32 h-32" />
+            
+            {/* 1. Emily Profile Avatar Card (Click to Edit!) */}
+            <div 
+              onClick={openEditProfile}
+              className="group relative flex flex-col items-center text-center cursor-pointer p-2 rounded-3xl hover:bg-white/40 transition-all"
+              title="Click to edit your profile and avatar"
+            >
+              <div className="w-full bg-white rounded-[26px] p-2.5 shadow-[0_4px_16px_rgba(139,92,246,0.06)] flex items-center justify-center relative overflow-hidden">
+                {renderAvatar(userProfile.avatarStyle, 'w-32 h-32')}
+                <div className="absolute inset-0 bg-purple-900/10 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-[26px]">
+                  <span className="bg-white/95 text-purple-700 text-[10px] font-black px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
+                    <Edit2 className="w-3 h-3" />
+                    <span>Edit</span>
+                  </span>
+                </div>
               </div>
+
               <div className="mt-2.5">
-                <div className="font-extrabold text-lg text-slate-800 flex items-center justify-center gap-1">
-                  <span>Emily</span>
+                <div className="font-extrabold text-lg text-slate-800 flex items-center justify-center gap-1 group-hover:text-purple-700 transition-colors">
+                  <span>{userProfile.name}</span>
                   <span className="text-purple-600 text-sm">💜</span>
                 </div>
                 <div className="text-[11px] font-bold text-purple-600/70 flex items-center justify-center gap-1">
-                  <span>Productivity & Focus Explorer</span>
+                  <span>{userProfile.role}</span>
                   <span className="text-amber-400 text-xs">✨</span>
                 </div>
               </div>
@@ -238,12 +482,21 @@ export const EmilyDashboard: React.FC = () => {
             </nav>
           </div>
 
-          {/* 3. Bottom Plant Encouragement Card */}
-          <div className="bg-white rounded-2xl p-2.5 shadow-sm border border-purple-50 flex items-center gap-2.5">
+          {/* 3. Bottom Plant Encouragement Card (Click to Edit Quote!) */}
+          <div 
+            onClick={() => setIsAffirmationModalOpen(true)}
+            className="group bg-white rounded-2xl p-2.5 shadow-sm border border-purple-50 flex items-center gap-2.5 cursor-pointer hover:border-purple-200 transition-colors"
+            title="Click to edit daily affirmation"
+          >
             <SmilingPlantPot className="w-10 h-10 shrink-0" />
-            <p className="text-[10px] font-extrabold text-slate-700 leading-tight">
-              Small progress every day adds up to big results <span className="text-emerald-500">🌱</span>
-            </p>
+            <div className="min-w-0">
+              <p className="text-[10px] font-extrabold text-slate-700 leading-tight truncate">
+                {userProfile.quote || 'Small progress every day adds up to big results 🌱'}
+              </p>
+              <span className="text-[9px] font-black text-purple-600/70 opacity-0 group-hover:opacity-100 transition-opacity">
+                Click to edit
+              </span>
+            </div>
           </div>
         </aside>
 
@@ -265,46 +518,75 @@ export const EmilyDashboard: React.FC = () => {
           {/* MAIN REFERENCE DASHBOARD (When activeNav === 'dashboard') */}
           {activeNav === 'dashboard' && (
             <div className="space-y-5 animate-fadeIn">
-              {/* TOP HEADER: Greeting + Search & Notification Controls */}
+              
+              {/* TOP HEADER: Greeting + Personalize & First-Time Action Buttons */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
+                <div 
+                  onClick={openEditProfile}
+                  className="cursor-pointer group"
+                  title="Click to edit greeting and subtitle"
+                >
                   <div className="flex items-center gap-2">
-                    <h1 className="text-2xl sm:text-[28px] font-black text-slate-900 tracking-tight flex items-center gap-2 font-['Quicksand',sans-serif]">
-                      <span>Good morning, Emily!</span>
+                    <h1 className="text-2xl sm:text-[28px] font-black text-slate-900 tracking-tight flex items-center gap-2 font-['Quicksand',sans-serif] group-hover:text-purple-800 transition-colors">
+                      <span>Good morning, {userProfile.name}!</span>
                       <ClayCloud className="w-7 h-7 -mt-1 inline-block" />
+                      <Edit2 className="w-4 h-4 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </h1>
                   </div>
                   <p className="text-xs text-slate-500 font-bold mt-0.5">
-                    Let's make today productive and amazing!
+                    {userProfile.subtitle || "Let's make today productive and amazing!"}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2.5 self-end sm:self-center">
+                <div className="flex items-center gap-2 self-end sm:self-center flex-wrap">
+                  {/* First-Time Setup / Personalize Button */}
+                  <button
+                    onClick={openOnboarding}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-black shadow-xs hover:opacity-95 transition-all active:scale-95"
+                    title="Run the First-Time Onboarding Flow to set tasks and check your schedule"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                    <span>New User Setup</span>
+                  </button>
+
+                  {/* Check Schedule Button */}
+                  <button
+                    onClick={() => setIsScheduleModalOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#E9E4D8] text-purple-800 text-xs font-black shadow-xs hover:bg-purple-50 transition-all active:scale-95"
+                    title="Check Today's Schedule Timeline"
+                  >
+                    <CalendarCheck className="w-3.5 h-3.5 text-purple-600" />
+                    <span>Check Schedule</span>
+                  </button>
+
                   {/* Search Bar */}
-                  <div className="relative">
-                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <div className="relative hidden md:block">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
                       placeholder="Search..."
-                      className="w-40 sm:w-56 bg-white border border-[#E9E4D8] rounded-full pl-9 pr-4 py-2 text-xs font-bold text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-purple-400 shadow-xs"
+                      className="w-36 bg-white border border-[#E9E4D8] rounded-full pl-8 pr-3 py-1.5 text-xs font-bold text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-purple-400 shadow-xs"
                     />
                   </div>
 
-                  {/* Notification Bell Button with Badge (3) */}
-                  <button className="relative w-9 h-9 rounded-full bg-white border border-[#E9E4D8] flex items-center justify-center text-slate-600 shadow-xs hover:bg-slate-50 transition-colors">
-                    <Bell className="w-4 h-4 fill-slate-500 text-slate-500" />
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#F43F5E] text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs">
-                      3
+                  {/* Notification Bell */}
+                  <button 
+                    onClick={() => setIsScheduleModalOpen(true)}
+                    className="relative w-8 h-8 rounded-full bg-white border border-[#E9E4D8] flex items-center justify-center text-slate-600 shadow-xs hover:bg-slate-50 transition-colors"
+                  >
+                    <Bell className="w-3.5 h-3.5 fill-slate-500 text-slate-500" />
+                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#F43F5E] text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-xs">
+                      {reminders.length}
                     </span>
                   </button>
 
-                  {/* Bunny Profile Icon Button */}
+                  {/* Avatar Profile Button */}
                   <button 
-                    onClick={() => setActiveNav('momentum')}
-                    className="w-9 h-9 rounded-full bg-white border border-[#E9E4D8] flex items-center justify-center shadow-xs hover:scale-105 transition-transform"
-                    title="Gentle Return & Momentum"
+                    onClick={openEditProfile}
+                    className="w-8 h-8 rounded-full bg-white border border-[#E9E4D8] flex items-center justify-center shadow-xs hover:scale-105 transition-transform"
+                    title="Edit Profile"
                   >
-                    <BunnyProfileIcon className="w-8 h-8" />
+                    <BunnyProfileIcon className="w-7 h-7" />
                   </button>
                 </div>
               </div>
@@ -315,7 +597,7 @@ export const EmilyDashboard: React.FC = () => {
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
                   <span>MINDSPACE Shield: Active</span>
                   <span className="hidden sm:inline font-medium text-purple-700">
-                    • 14 mindful returns (+2h 15m screen time reclaimed)
+                    • {momentum.totalReturns} mindful returns (+{Math.round(momentum.screenTimeSavedMinutes / 60)}h screen time reclaimed)
                   </span>
                 </div>
 
@@ -350,9 +632,9 @@ export const EmilyDashboard: React.FC = () => {
                   </div>
                   <div className="space-y-0.5 min-w-0">
                     <div className="text-xs font-extrabold text-slate-500">Tasks Done</div>
-                    <div className="text-2xl font-black text-slate-900 leading-none">24</div>
+                    <div className="text-2xl font-black text-slate-900 leading-none">{tasksDoneDisplay}</div>
                     <div className="text-[10px] font-extrabold text-[#7C3AED]">
-                      +12% from yesterday
+                      +{completedCount} today
                     </div>
                   </div>
                 </div>
@@ -367,9 +649,9 @@ export const EmilyDashboard: React.FC = () => {
                   </div>
                   <div className="space-y-0.5 min-w-0">
                     <div className="text-xs font-extrabold text-slate-500">In Progress</div>
-                    <div className="text-2xl font-black text-slate-900 leading-none">7</div>
+                    <div className="text-2xl font-black text-slate-900 leading-none">{inProgressCount}</div>
                     <div className="text-[10px] font-extrabold text-[#F43F5E]">
-                      2 projects
+                      {projects.length} projects
                     </div>
                   </div>
                 </div>
@@ -384,7 +666,7 @@ export const EmilyDashboard: React.FC = () => {
                   </div>
                   <div className="space-y-0.5 min-w-0">
                     <div className="text-xs font-extrabold text-slate-500">Completed</div>
-                    <div className="text-2xl font-black text-slate-900 leading-none">56</div>
+                    <div className="text-2xl font-black text-slate-900 leading-none">{completedDisplay}</div>
                     <div className="text-[10px] font-extrabold text-[#10B981]">
                       This month
                     </div>
@@ -401,7 +683,7 @@ export const EmilyDashboard: React.FC = () => {
                   </div>
                   <div className="space-y-0.5 min-w-0">
                     <div className="text-xs font-extrabold text-slate-500">Focus Time</div>
-                    <div className="text-2xl font-black text-slate-900 leading-none">18h</div>
+                    <div className="text-2xl font-black text-slate-900 leading-none">{focusTimeDisplay}</div>
                     <div className="text-[10px] font-extrabold text-[#D97706]">
                       +4h from last week
                     </div>
@@ -419,16 +701,30 @@ export const EmilyDashboard: React.FC = () => {
                     <h3 className="text-sm font-black text-slate-900 font-['Quicksand',sans-serif]">
                       Productivity Overview
                     </h3>
-                    <button className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF7F2] border border-[#E9E4D8] text-[11px] font-bold text-slate-700 hover:bg-[#F3EFE7] transition-colors">
-                      <span>This Week</span>
-                      <ChevronDown className="w-3 h-3" />
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      {(['This Week', 'Last Week', 'This Month'] as const).map(range => (
+                        <button
+                          key={range}
+                          onClick={() => setChartRange(range)}
+                          className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
+                            chartRange === range
+                              ? 'bg-[#DDD6FE] text-[#5B21B6]'
+                              : 'bg-[#FAF7F2] border border-[#E9E4D8] text-slate-600 hover:bg-[#F3EFE7]'
+                          }`}
+                        >
+                          {range}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Line Chart */}
                   <div className="relative pt-6 pb-2">
-                    {/* Tooltip over Sat node */}
-                    <div className="absolute right-[19%] top-0 z-10 flex flex-col items-center">
+                    {/* Tooltip over Active node */}
+                    <div 
+                      className="absolute top-0 z-10 flex flex-col items-center transition-all duration-300"
+                      style={{ left: `${(activePointIndex / 6) * 85 + 4}%` }}
+                    >
                       <div className="bg-[#DDD6FE] text-[#5B21B6] text-[10px] font-black px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
                         <span>Great job!</span>
                         <span>🎉</span>
@@ -481,38 +777,47 @@ export const EmilyDashboard: React.FC = () => {
                             key={i}
                             cx={pt.x}
                             cy={pt.y}
-                            r="5.5"
-                            fill="#7C3AED"
+                            r={activePointIndex === i ? 7 : 5.5}
+                            fill={activePointIndex === i ? '#6D28D9' : '#7C3AED'}
                             stroke="#FFFFFF"
                             strokeWidth="2.5"
-                            className="shadow-sm transition-transform hover:scale-125"
+                            onClick={() => setActivePointIndex(i)}
+                            className="shadow-sm cursor-pointer transition-transform hover:scale-125"
                           />
                         ))}
                       </svg>
                     </div>
 
                     <div className="flex justify-between text-[11px] font-bold text-slate-400 pt-2 px-1">
-                      <span>Mon</span>
-                      <span>Tue</span>
-                      <span>Wed</span>
-                      <span>Thu</span>
-                      <span>Fri</span>
-                      <span>Sat</span>
-                      <span>Sun</span>
+                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, idx) => (
+                        <span 
+                          key={d} 
+                          onClick={() => setActivePointIndex(idx)}
+                          className={`cursor-pointer transition-colors ${activePointIndex === idx ? 'text-purple-700 font-black' : 'hover:text-slate-700'}`}
+                        >
+                          {d}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 </div>
 
-                {/* Right: May 2024 Calendar Card (xl:col-span-4) */}
+                {/* Right: May 2024 Interactive Calendar Card (xl:col-span-4) */}
                 <div className="xl:col-span-4 bg-white rounded-[28px] p-5 border border-[#ECE6D8] shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-3">
                   <div className="flex items-center justify-between text-slate-800">
-                    <button className="p-1 rounded-full text-slate-400 hover:text-slate-700">
+                    <button 
+                      onClick={() => setCalendarMonth('April 2024')}
+                      className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                    >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
                     <div className="text-xs font-black text-slate-900 font-['Quicksand',sans-serif]">
-                      May 2024
+                      {calendarMonth}
                     </div>
-                    <button className="p-1 rounded-full text-slate-400 hover:text-slate-700">
+                    <button 
+                      onClick={() => setCalendarMonth('June 2024')}
+                      className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                    >
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -530,47 +835,46 @@ export const EmilyDashboard: React.FC = () => {
                   <div className="grid grid-cols-7 gap-y-1 text-center text-xs font-bold">
                     <span className="text-slate-300 py-1">29</span>
                     <span className="text-slate-300 py-1">30</span>
-                    <span className="text-slate-700 py-1">1</span>
-                    <span className="text-slate-700 py-1">2</span>
-                    <span className="text-slate-700 py-1">3</span>
-                    <span className="text-[#F43F5E] py-1">4</span>
-                    <span className="text-[#F43F5E] py-1">5</span>
+                    {[...Array(31)].map((_, i) => {
+                      const dayNum = i + 1;
+                      const isSelected = selectedDay === dayNum;
+                      const isWeekend = (dayNum + 2) % 7 === 0 || (dayNum + 1) % 7 === 0;
 
-                    <span className="text-slate-700 py-1">6</span>
-                    <span className="text-slate-700 py-1">7</span>
-                    <span className="text-slate-700 py-1">8</span>
-                    <span className="text-slate-700 py-1">9</span>
-                    <span className="text-slate-700 py-1">10</span>
-                    <span className="text-[#F43F5E] py-1">11</span>
-                    <span className="text-[#F43F5E] py-1">12</span>
-
-                    <span className="text-slate-700 py-1">13</span>
-                    <span className="text-slate-700 py-1">14</span>
-                    <span className="py-1">
-                      <span className="w-6 h-6 rounded-full bg-[#8B5CF6] text-white font-black inline-flex items-center justify-center shadow-xs">
-                        15
-                      </span>
-                    </span>
-                    <span className="text-slate-700 py-1">16</span>
-                    <span className="text-slate-700 py-1">17</span>
-                    <span className="text-[#F43F5E] py-1">18</span>
-                    <span className="text-[#F43F5E] py-1">19</span>
-
-                    <span className="text-slate-700 py-1">20</span>
-                    <span className="text-slate-700 py-1">21</span>
-                    <span className="text-slate-700 py-1">22</span>
-                    <span className="text-slate-700 py-1">23</span>
-                    <span className="text-slate-700 py-1">24</span>
-                    <span className="text-[#F43F5E] py-1">25</span>
-                    <span className="text-[#F43F5E] py-1">26</span>
-
-                    <span className="text-slate-700 py-1">27</span>
-                    <span className="text-slate-700 py-1">28</span>
-                    <span className="text-slate-700 py-1">29</span>
-                    <span className="text-slate-700 py-1">30</span>
-                    <span className="text-slate-700 py-1">31</span>
+                      return (
+                        <span 
+                          key={dayNum} 
+                          onClick={() => {
+                            setSelectedDay(dayNum);
+                            setIsScheduleModalOpen(true);
+                          }}
+                          className="py-1 cursor-pointer"
+                        >
+                          {isSelected ? (
+                            <span className="w-6 h-6 rounded-full bg-[#8B5CF6] text-white font-black inline-flex items-center justify-center shadow-xs">
+                              {dayNum}
+                            </span>
+                          ) : (
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full hover:bg-purple-100 transition-colors ${
+                              isWeekend ? 'text-[#F43F5E]' : 'text-slate-700'
+                            }`}>
+                              {dayNum}
+                            </span>
+                          )}
+                        </span>
+                      );
+                    })}
                     <span className="text-slate-300 py-1">1</span>
                     <span className="text-slate-300 py-1">2</span>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                    <span className="font-extrabold text-slate-500">Selected Day: May {selectedDay}</span>
+                    <button
+                      onClick={() => setIsScheduleModalOpen(true)}
+                      className="text-purple-600 font-black hover:text-purple-800"
+                    >
+                      View Schedule →
+                    </button>
                   </div>
                 </div>
 
@@ -579,38 +883,52 @@ export const EmilyDashboard: React.FC = () => {
               {/* ROW 3: My Projects (4 cols) | Top Tasks (4 cols) | Reminders & Motivation (4 cols) */}
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5 items-start">
                 
-                {/* Column 1: My Projects Card */}
+                {/* Column 1: My Projects Card (Fully Editable!) */}
                 <div className="xl:col-span-4 bg-white rounded-[28px] p-5 border border-[#ECE6D8] shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-black text-slate-900 font-['Quicksand',sans-serif]">My Projects</h3>
-                    <button 
-                      onClick={() => setActiveNav('planner')}
-                      className="px-2.5 py-0.5 rounded-full bg-[#EDE9FE] text-[#6D28D9] text-[10px] font-black hover:bg-[#DDD6FE] transition-colors"
-                    >
-                      View all
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button 
+                        onClick={handleOpenAddProject}
+                        className="w-5 h-5 rounded-lg bg-[#8B5CF6] text-white flex items-center justify-center shadow-xs hover:bg-[#7C3AED] transition-colors"
+                        title="Add New Project"
+                      >
+                        <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                      </button>
+                      <button 
+                        onClick={() => setActiveNav('planner')}
+                        className="px-2.5 py-0.5 rounded-full bg-[#EDE9FE] text-[#6D28D9] text-[10px] font-black hover:bg-[#DDD6FE] transition-colors"
+                      >
+                        View all
+                      </button>
+                    </div>
                   </div>
 
                   <div className="space-y-3.5">
-                    {[
-                      { name: 'Website Redesign', percent: 75, color: 'purple', bar: 'bg-[#8B5CF6]' },
-                      { name: 'Marketing Campaign', percent: 60, color: 'pink', bar: 'bg-[#FB7185]' },
-                      { name: 'Mobile App', percent: 40, color: 'green', bar: 'bg-[#4ADE80]' },
-                      { name: 'User Research', percent: 90, color: 'yellow', bar: 'bg-[#FACC15]' },
-                    ].map(proj => (
-                      <div key={proj.name} className="space-y-1">
+                    {projects.map(proj => (
+                      <div 
+                        key={proj.id} 
+                        onClick={() => handleOpenEditProject(proj)}
+                        className="group space-y-1 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 transition-colors"
+                        title="Click to edit project name, progress, or color"
+                      >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <ClayFolder color={proj.color as 'purple' | 'pink' | 'green' | 'yellow'} className="w-5 h-5 shrink-0" />
-                            <span className="text-xs font-bold text-slate-800">{proj.name}</span>
+                            <ClayFolder color={proj.color as any} className="w-5 h-5 shrink-0" />
+                            <span className="text-xs font-bold text-slate-800 group-hover:text-purple-700 transition-colors">
+                              {proj.name}
+                            </span>
                           </div>
-                          <span className="text-[11px] font-bold text-slate-500 font-mono">
-                            {proj.percent}%
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-bold text-slate-500 font-mono">
+                              {proj.percent}%
+                            </span>
+                            <Edit2 className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
                         </div>
                         <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
                           <div
-                            className={`h-full rounded-full ${proj.bar}`}
+                            className={`h-full rounded-full transition-all duration-500 ${getProjectBarClass(proj.color)}`}
                             style={{ width: `${proj.percent}%` }}
                           />
                         </div>
@@ -619,53 +937,87 @@ export const EmilyDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Column 2: Top Tasks Card */}
+                {/* Column 2: Top Tasks Card (Fully Editable!) */}
                 <div className="xl:col-span-4 bg-white rounded-[28px] p-5 border border-[#ECE6D8] shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-black text-slate-900 font-['Quicksand',sans-serif]">Top Tasks</h3>
-                    <button 
-                      onClick={() => setActiveNav('tasks')}
-                      className="px-2.5 py-0.5 rounded-full bg-[#DCFCE7] text-[#15803D] text-[10px] font-black hover:bg-[#BBF7D0] transition-colors"
-                    >
-                      View all
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button 
+                        onClick={handleOpenAddTask}
+                        className="w-5 h-5 rounded-lg bg-[#22C55E] text-white flex items-center justify-center shadow-xs hover:bg-[#16A34A] transition-colors"
+                        title="Add New Task"
+                      >
+                        <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                      </button>
+                      <button 
+                        onClick={() => setActiveNav('tasks')}
+                        className="px-2.5 py-0.5 rounded-full bg-[#DCFCE7] text-[#15803D] text-[10px] font-black hover:bg-[#BBF7D0] transition-colors"
+                      >
+                        View all
+                      </button>
+                    </div>
                   </div>
 
                   <div className="space-y-2.5">
-                    {taskState.map(task => {
+                    {tasks.slice(0, 5).map(task => {
+                      const isCompleted = task.status === 'completed';
                       const badgeColor = {
-                        High: 'bg-[#FEECEE] text-[#E11D48]',
-                        Medium: 'bg-[#FEF6E8] text-[#D97706]',
-                        Low: 'bg-[#EFF6FF] text-[#2563EB]',
-                      }[task.priority];
+                        P1: 'bg-[#FEECEE] text-[#E11D48]',
+                        P2: 'bg-[#FEF6E8] text-[#D97706]',
+                        P3: 'bg-[#EFF6FF] text-[#2563EB]',
+                        P4: 'bg-slate-100 text-slate-600'
+                      }[task.priority] || 'bg-slate-100 text-slate-600';
+
+                      const priorityLabel = {
+                        P1: 'High',
+                        P2: 'Medium',
+                        P3: 'Low',
+                        P4: 'Low'
+                      }[task.priority] || 'Medium';
 
                       return (
                         <div
                           key={task.id}
-                          onClick={() => toggleTask(task.id)}
-                          className="flex items-center justify-between gap-2 p-1.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
+                          className="group flex items-center justify-between gap-2 p-1.5 rounded-xl hover:bg-slate-50 transition-colors"
                         >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 transition-colors ${
-                              task.checked ? 'bg-[#22C55E]' : 'border-2 border-slate-300 bg-white'
-                            }`}>
-                              {task.checked && <Check className="w-3 h-3 text-white stroke-[3]" />}
-                            </div>
-                            <span className={`text-xs font-bold text-slate-800 truncate ${task.checked ? 'line-through text-slate-400' : ''}`}>
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <button
+                              onClick={() => handleToggleTaskStatus(task)}
+                              className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                                isCompleted ? 'bg-[#22C55E]' : 'border-2 border-slate-300 bg-white hover:border-purple-400'
+                              }`}
+                            >
+                              {isCompleted && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                            </button>
+                            <span 
+                              onClick={() => handleOpenEditTask(task)}
+                              className={`text-xs font-bold truncate cursor-pointer hover:text-purple-700 transition-colors ${
+                                isCompleted ? 'line-through text-slate-400' : 'text-slate-800'
+                              }`}
+                              title="Click to edit task title or priority"
+                            >
                               {task.title}
                             </span>
                           </div>
 
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${badgeColor}`}>
-                            {task.priority}
-                          </span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}`}>
+                              {priorityLabel}
+                            </span>
+                            <button
+                              onClick={() => handleOpenEditTask(task)}
+                              className="text-slate-400 hover:text-purple-700 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Edit2 className="w-3 h-3" />
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Column 3: Upcoming Reminders & Motivation Card Stack */}
+                {/* Column 3: Upcoming Reminders & Motivation Card Stack (Fully Editable!) */}
                 <div className="xl:col-span-4 space-y-4">
                   
                   {/* Top: Upcoming Reminders Card */}
@@ -673,60 +1025,68 @@ export const EmilyDashboard: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-black text-slate-900 font-['Quicksand',sans-serif]">Upcoming Reminders</h3>
                       <button 
-                        onClick={() => setActiveNav('planner')}
+                        onClick={handleOpenAddReminder}
                         className="w-5 h-5 rounded-lg bg-[#FB7185] text-white flex items-center justify-center shadow-xs hover:bg-[#F43F5E] transition-colors"
+                        title="Add New Reminder"
                       >
                         <Plus className="w-3.5 h-3.5 stroke-[3]" />
                       </button>
                     </div>
 
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#FFE4E6] text-[#F43F5E] flex items-center justify-center shrink-0">
-                          <Clock className="w-4 h-4 stroke-[2.5]" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-black text-slate-900">Team stand-up</div>
-                          <div className="text-[10px] font-bold text-slate-400">Today, 10:00 AM</div>
-                        </div>
-                      </div>
+                      {reminders.map(rem => {
+                        return (
+                          <div 
+                            key={rem.id} 
+                            onClick={() => handleOpenEditReminder(rem)}
+                            className="group flex items-center justify-between gap-2 p-1 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
+                            title="Click to edit reminder"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                                rem.type === 'clock' ? 'bg-[#FFE4E6] text-[#F43F5E]' :
+                                rem.type === 'video' ? 'bg-[#E0F2FE] text-[#0284C7]' :
+                                rem.type === 'flag' ? 'bg-emerald-100 text-emerald-700' :
+                                'bg-[#FEF3C7] text-[#D97706]'
+                              }`}>
+                                {rem.type === 'clock' && <Clock className="w-4 h-4 stroke-[2.5]" />}
+                                {rem.type === 'video' && <Video className="w-4 h-4 stroke-[2.5]" />}
+                                {rem.type === 'flag' && <Flag className="w-4 h-4 stroke-[2.5]" />}
+                                {rem.type === 'bell' && <Bell className="w-4 h-4 fill-amber-500 text-amber-500" />}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-xs font-black text-slate-900 truncate group-hover:text-purple-700 transition-colors">
+                                  {rem.title}
+                                </div>
+                                <div className="text-[10px] font-bold text-slate-400">{rem.timeStr}</div>
+                              </div>
+                            </div>
 
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center shrink-0">
-                          <Video className="w-4 h-4 stroke-[2.5]" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-black text-slate-900">Client presentation</div>
-                          <div className="text-[10px] font-bold text-slate-400">Tomorrow, 2:30 PM</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
-                          <Bell className="w-4 h-4 fill-amber-500 text-amber-500" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-black text-slate-900">Submit report</div>
-                          <div className="text-[10px] font-bold text-slate-400">May 17, 11:59 PM</div>
-                        </div>
-                      </div>
+                            <Edit2 className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  {/* Bottom: Motivation Bunny Card */}
+                  {/* Bottom: Motivation Bunny Card (Click to Edit Affirmation!) */}
                   <div 
-                    onClick={() => setActiveNav('momentum')}
-                    className="relative overflow-hidden bg-[#ECE8F8] rounded-[28px] p-5 border border-[#DDD6FE] shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => setIsAffirmationModalOpen(true)}
+                    className="group relative overflow-hidden bg-[#ECE8F8] rounded-[28px] p-5 border border-[#DDD6FE] shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md transition-shadow"
+                    title="Click to edit your motivational affirmation"
                   >
                     <span className="absolute top-2 right-12 text-xs text-amber-300">⭐</span>
                     <span className="absolute bottom-3 left-28 text-xs text-amber-300">⭐</span>
 
                     <div className="space-y-1 max-w-[190px] relative z-10">
-                      <h4 className="text-xs font-black text-[#5B21B6] leading-snug">
-                        You're doing amazing, Emily!
-                      </h4>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="text-xs font-black text-[#5B21B6] leading-snug">
+                          You're doing amazing, {userProfile.name}!
+                        </h4>
+                        <Edit2 className="w-3 h-3 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                      </div>
                       <p className="text-[10px] font-bold text-[#6D28D9]/80 leading-relaxed">
-                        Keep up the good work and don't forget to take care of yourself <span className="text-purple-600">💜</span>
+                        {userProfile.quote || "Keep up the good work and don't forget to take care of yourself 💜"}
                       </p>
                     </div>
 
@@ -744,6 +1104,518 @@ export const EmilyDashboard: React.FC = () => {
         </main>
 
       </div>
+
+      {/* ========================================================================= */}
+      {/* EDIT MODAL 1: Profile Editor                                              */}
+      {/* ========================================================================= */}
+      {isProfileModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-md bg-[#F7F4EE] rounded-[32px] border border-[#E9E4D8] shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-black text-slate-900">Edit Your Profile</h3>
+              <button 
+                onClick={() => setIsProfileModalOpen(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">Name</label>
+                <input
+                  type="text"
+                  value={profileForm.name}
+                  onChange={e => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">Title / Role</label>
+                <input
+                  type="text"
+                  value={profileForm.role}
+                  onChange={e => setProfileForm(prev => ({ ...prev, role: e.target.value }))}
+                  className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">Subtitle Greeting</label>
+                <input
+                  type="text"
+                  value={profileForm.subtitle}
+                  onChange={e => setProfileForm(prev => ({ ...prev, subtitle: e.target.value }))}
+                  className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">Avatar Style</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { id: 'emily', label: 'Emily' },
+                    { id: 'bunny', label: 'Bunny' },
+                    { id: 'plant', label: 'Plant' },
+                    { id: 'bear', label: 'Scholar' },
+                  ].map(av => (
+                    <button
+                      key={av.id}
+                      type="button"
+                      onClick={() => setProfileForm(prev => ({ ...prev, avatarStyle: av.id as any }))}
+                      className={`p-2 rounded-xl text-xs font-black border transition-all ${
+                        profileForm.avatarStyle === av.id
+                          ? 'border-purple-600 bg-purple-100 text-purple-900'
+                          : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      {av.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                onClick={() => setIsProfileModalOpen(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveProfile}
+                className="px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-xl text-xs font-black shadow-xs transition-all"
+              >
+                Save Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* EDIT MODAL 2: Project Editor (Add/Edit/Delete)                             */}
+      {/* ========================================================================= */}
+      {isProjectModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-md bg-[#F7F4EE] rounded-[32px] border border-[#E9E4D8] shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-black text-slate-900">
+                {editingProject ? 'Edit Project' : 'Add New Project'}
+              </h3>
+              <button 
+                onClick={() => setIsProjectModalOpen(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">Project Name</label>
+                <input
+                  type="text"
+                  value={projectForm.name}
+                  onChange={e => setProjectForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g. Website Redesign"
+                  className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-black text-slate-700">Progress ({projectForm.percent}%)</label>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={projectForm.percent}
+                  onChange={e => setProjectForm(prev => ({ ...prev, percent: Number(e.target.value) }))}
+                  className="w-full accent-purple-600"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">Folder Color</label>
+                <div className="flex gap-2">
+                  {(['purple', 'pink', 'green', 'yellow', 'blue', 'rose'] as const).map(c => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setProjectForm(prev => ({ ...prev, color: c }))}
+                      className={`w-7 h-7 rounded-full transition-transform ${
+                        c === 'purple' ? 'bg-[#8B5CF6]' :
+                        c === 'pink' ? 'bg-[#FB7185]' :
+                        c === 'green' ? 'bg-[#4ADE80]' :
+                        c === 'yellow' ? 'bg-[#FACC15]' :
+                        c === 'blue' ? 'bg-[#38BDF8]' :
+                        'bg-[#F43F5E]'
+                      } ${projectForm.color === c ? 'ring-3 ring-purple-400 scale-110' : 'opacity-80 hover:opacity-100'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              {editingProject ? (
+                <button
+                  onClick={() => {
+                    deleteProject(editingProject.id);
+                    setIsProjectModalOpen(false);
+                  }}
+                  className="flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
+              ) : <div />}
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsProjectModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveProject}
+                  className="px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-xl text-xs font-black shadow-xs transition-all"
+                >
+                  {editingProject ? 'Save Changes' : 'Create Project'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* EDIT MODAL 3: Task Editor (Add/Edit/Delete)                                */}
+      {/* ========================================================================= */}
+      {isTaskModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-md bg-[#F7F4EE] rounded-[32px] border border-[#E9E4D8] shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-black text-slate-900">
+                {editingTask ? 'Edit Task' : 'Add Top Task'}
+              </h3>
+              <button 
+                onClick={() => setIsTaskModalOpen(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">Task Title</label>
+                <input
+                  type="text"
+                  value={taskForm.title}
+                  onChange={e => setTaskForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="e.g. Design landing page"
+                  className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">Category</label>
+                <select
+                  value={taskForm.categoryId}
+                  onChange={e => setTaskForm(prev => ({ ...prev, categoryId: e.target.value }))}
+                  className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none"
+                >
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-black text-slate-700 block mb-1">Priority</label>
+                  <select
+                    value={taskForm.priority}
+                    onChange={e => setTaskForm(prev => ({ ...prev, priority: e.target.value as Priority }))}
+                    className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none"
+                  >
+                    <option value="P1">High (P1)</option>
+                    <option value="P2">Medium (P2)</option>
+                    <option value="P3">Low (P3)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-black text-slate-700 block mb-1">Duration (min)</label>
+                  <input
+                    type="number"
+                    value={taskForm.estimatedMinutes}
+                    onChange={e => setTaskForm(prev => ({ ...prev, estimatedMinutes: Number(e.target.value) }))}
+                    className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              {editingTask ? (
+                <button
+                  onClick={() => {
+                    deleteTask(editingTask.id);
+                    setIsTaskModalOpen(false);
+                  }}
+                  className="flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
+              ) : <div />}
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsTaskModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveTask}
+                  className="px-5 py-2 bg-[#22C55E] hover:bg-[#16A34A] text-white rounded-xl text-xs font-black shadow-xs transition-all"
+                >
+                  {editingTask ? 'Save Task' : 'Add Task'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* EDIT MODAL 4: Reminder Editor (Add/Edit/Delete)                            */}
+      {/* ========================================================================= */}
+      {isReminderModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-md bg-[#F7F4EE] rounded-[32px] border border-[#E9E4D8] shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-black text-slate-900">
+                {editingReminder ? 'Edit Reminder' : 'Add Reminder'}
+              </h3>
+              <button 
+                onClick={() => setIsReminderModalOpen(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">Reminder Title</label>
+                <input
+                  type="text"
+                  value={reminderForm.title}
+                  onChange={e => setReminderForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="e.g. Team stand-up"
+                  className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">Scheduled Time String</label>
+                <input
+                  type="text"
+                  value={reminderForm.timeStr}
+                  onChange={e => setReminderForm(prev => ({ ...prev, timeStr: e.target.value }))}
+                  placeholder="e.g. Today, 10:00 AM"
+                  className="w-full bg-white border border-[#E9E4D8] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">Reminder Type Icon</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { id: 'clock', label: 'Standup', icon: <Clock className="w-4 h-4" /> },
+                    { id: 'video', label: 'Call', icon: <Video className="w-4 h-4" /> },
+                    { id: 'bell', label: 'Alert', icon: <Bell className="w-4 h-4" /> },
+                    { id: 'flag', label: 'Goal', icon: <Flag className="w-4 h-4" /> },
+                  ].map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setReminderForm(prev => ({ ...prev, type: item.id as any }))}
+                      className={`p-2.5 rounded-xl text-xs font-bold border flex flex-col items-center gap-1 transition-all ${
+                        reminderForm.type === item.id
+                          ? 'border-purple-600 bg-purple-100 text-purple-900 shadow-xs'
+                          : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      {item.icon}
+                      <span className="text-[10px]">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              {editingReminder ? (
+                <button
+                  onClick={() => {
+                    deleteReminder(editingReminder.id);
+                    setIsReminderModalOpen(false);
+                  }}
+                  className="flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
+              ) : <div />}
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsReminderModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveReminder}
+                  className="px-5 py-2 bg-[#FB7185] hover:bg-[#F43F5E] text-white rounded-xl text-xs font-black shadow-xs transition-all"
+                >
+                  {editingReminder ? 'Save Reminder' : 'Add Reminder'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* EDIT MODAL 5: Affirmation / Motivation Editor                             */}
+      {/* ========================================================================= */}
+      {isAffirmationModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-md bg-[#F7F4EE] rounded-[32px] border border-[#E9E4D8] shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-black text-slate-900 flex items-center gap-1.5">
+                <Heart className="w-4 h-4 text-pink-500 fill-pink-500" />
+                <span>Daily Affirmation</span>
+              </h3>
+              <button 
+                onClick={() => setIsAffirmationModalOpen(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div>
+              <label className="text-xs font-black text-slate-700 block mb-1">
+                Personal Motivation Message
+              </label>
+              <textarea
+                rows={3}
+                value={affirmationText}
+                onChange={e => setAffirmationText(e.target.value)}
+                placeholder="Keep up the good work and remember to take care of yourself 💜"
+                className="w-full bg-white border border-[#E9E4D8] rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-400"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                onClick={() => setIsAffirmationModalOpen(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveAffirmation}
+                className="px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-xl text-xs font-black shadow-xs transition-all"
+              >
+                Update Affirmation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SCHEDULE CHECK MODAL: Check & Review Daily Schedule Timeline              */}
+      {/* ========================================================================= */}
+      {isScheduleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-xl bg-[#F7F4EE] rounded-[34px] border border-[#E9E4D8] shadow-2xl p-6 space-y-5 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <CalendarCheck className="w-5 h-5 text-purple-600" />
+                <h3 className="text-base font-black text-slate-900">
+                  {userProfile.name}'s Schedule for May {selectedDay}, 2024
+                </h3>
+              </div>
+              <button 
+                onClick={() => setIsScheduleModalOpen(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Daily Schedule Timeline List */}
+            <div className="space-y-3">
+              {[
+                { time: '09:00 AM', title: tasks[0]?.title || 'Design Landing Page UI', tag: 'Deep Focus', duration: '45m', color: 'bg-purple-100 text-purple-800 border-purple-200' },
+                { time: '10:00 AM', title: reminders[0]?.title || 'Team stand-up', tag: 'Meeting', duration: '20m', color: 'bg-rose-100 text-rose-800 border-rose-200' },
+                { time: '10:30 AM', title: 'Intentional Pause: 5m tea & stretch 🍵', tag: 'Break', duration: '15m', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+                { time: '11:00 AM', title: tasks[1]?.title || 'Write Project Proposal', tag: 'Focus', duration: '35m', color: 'bg-purple-100 text-purple-800 border-purple-200' },
+                { time: '01:00 PM', title: 'Mindful lunch break & sunlight walk', tag: 'Rest', duration: '60m', color: 'bg-amber-100 text-amber-800 border-amber-200' },
+                { time: '02:30 PM', title: reminders[1]?.title || 'Client presentation', tag: 'Call', duration: '30m', color: 'bg-blue-100 text-blue-800 border-blue-200' },
+                { time: '03:30 PM', title: tasks[2]?.title || 'Research competitors', tag: 'Deep Focus', duration: '40m', color: 'bg-purple-100 text-purple-800 border-purple-200' },
+              ].map((slot, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-[#EAE3D2] shadow-2xs">
+                  <span className="text-xs font-mono font-black text-purple-700 w-20 shrink-0">
+                    {slot.time}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-slate-800 truncate">{slot.title}</p>
+                    <span className="text-[10px] text-slate-400 font-bold">{slot.duration} duration</span>
+                  </div>
+                  <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border shrink-0 ${slot.color}`}>
+                    {slot.tag}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+              <button
+                onClick={() => {
+                  setIsScheduleModalOpen(false);
+                  setActiveNav('planner');
+                }}
+                className="text-xs font-black text-purple-700 hover:text-purple-900"
+              >
+                Open Full Smart Planner →
+              </button>
+              <button
+                onClick={() => setIsScheduleModalOpen(false)}
+                className="px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-xl text-xs font-black shadow-xs transition-all"
+              >
+                Done Checking
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

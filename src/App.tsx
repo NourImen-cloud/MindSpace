@@ -4,6 +4,7 @@ import { EmilyDashboard } from './components/reference/EmilyDashboard';
 import { IntentionalPauseModal } from './components/antiscroll/IntentionalPauseModal';
 import { FocusModeModal } from './components/focus/FocusModeModal';
 import { FocusSummaryModal } from './components/focus/FocusSummaryModal';
+import { WelcomeOnboardingModal } from './components/onboarding/WelcomeOnboardingModal';
 
 export function App() {
   return (
@@ -12,10 +13,11 @@ export function App() {
         {/* The Exact Pixel-Accurate Emily Productivity Dashboard */}
         <EmilyDashboard />
 
-        {/* Global Overlays for Focus Mode & Anti-Scrolling Sanctuary */}
+        {/* Global Overlays for Focus Mode, Anti-Scrolling Sanctuary & First-Time Onboarding */}
         <IntentionalPauseModal />
         <FocusModeModal />
         <FocusSummaryModal />
+        <WelcomeOnboardingModal />
       </div>
     </MindSpaceProvider>
   );

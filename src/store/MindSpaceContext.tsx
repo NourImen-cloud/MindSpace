@@ -11,7 +11,11 @@ import {
   UserSettings,
   ReturnMomentumStats,
   DistractionReason,
-  ParkingLotItem
+  ParkingLotItem,
+  Project,
+  Reminder,
+  UserProfile,
+  Priority
 } from '../types';
 import {
   DEFAULT_CATEGORIES,
@@ -21,6 +25,9 @@ import {
   INITIAL_DISTRACTION_EVENTS,
   INITIAL_SETTINGS,
   INITIAL_MOMENTUM_STATS,
+  INITIAL_PROJECTS,
+  INITIAL_REMINDERS,
+  INITIAL_USER_PROFILE,
   STORAGE_KEYS,
   loadFromStorage,
   saveToStorage,
@@ -31,6 +38,31 @@ import { soundEngine } from '../utils/audio';
 import { generateId } from '../utils/formatters';
 
 interface MindSpaceContextType {
+  // User Profile & Personalization
+  userProfile: UserProfile;
+  updateUserProfile: (updates: Partial<UserProfile>) => void;
+  isOnboardingOpen: boolean;
+  openOnboarding: () => void;
+  closeOnboarding: () => void;
+  completeOnboarding: (data: {
+    name: string;
+    role: string;
+    quote?: string;
+    avatarStyle?: UserProfile['avatarStyle'];
+    tasks?: Array<{ title: string; categoryId: string; priority: Priority; estimatedMinutes: number }>;
+  }) => void;
+  resetToNewUser: () => void;
+
+  // Projects & Reminders
+  projects: Project[];
+  addProject: (project: Omit<Project, 'id'>) => void;
+  updateProject: (id: string, updates: Partial<Project>) => void;
+  deleteProject: (id: string) => void;
+  reminders: Reminder[];
+  addReminder: (reminder: Omit<Reminder, 'id'>) => void;
+  updateReminder: (id: string, updates: Partial<Reminder>) => void;
+  deleteReminder: (id: string) => void;
+
   // Tasks & Categories
   tasks: Task[];
   categories: Category[];
@@ -107,6 +139,10 @@ export const MindSpaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [reflections, setReflections] = useState<WeeklyReflection[]>(() => loadFromStorage(STORAGE_KEYS.REFLECTIONS, []));
   const [settings, setSettings] = useState<UserSettings>(() => loadFromStorage(STORAGE_KEYS.SETTINGS, INITIAL_SETTINGS));
   const [momentum, setMomentum] = useState<ReturnMomentumStats>(() => loadFromStorage(STORAGE_KEYS.MOMENTUM, INITIAL_MOMENTUM_STATS));
+  const [projects, setProjects] = useState<Project[]>(() => loadFromStorage(STORAGE_KEYS.PROJECTS, INITIAL_PROJECTS));
+  const [reminders, setReminders] = useState<Reminder[]>(() => loadFromStorage(STORAGE_KEYS.REMINDERS, INITIAL_REMINDERS));
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => loadFromStorage(STORAGE_KEYS.USER_PROFILE, INITIAL_USER_PROFILE));
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(() => !userProfile.hasCompletedOnboarding);
 
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
 
@@ -137,6 +173,103 @@ export const MindSpaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useEffect(() => { saveToStorage(STORAGE_KEYS.REFLECTIONS, reflections); }, [reflections]);
   useEffect(() => { saveToStorage(STORAGE_KEYS.SETTINGS, settings); }, [settings]);
   useEffect(() => { saveToStorage(STORAGE_KEYS.MOMENTUM, momentum); }, [momentum]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.PROJECTS, projects); }, [projects]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.REMINDERS, reminders); }, [reminders]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.USER_PROFILE, userProfile); }, [userProfile]);
+
+  // User Profile & Onboarding Handlers
+  const updateUserProfile = (updates: Partial<UserProfile>) => {
+    setUserProfile(prev => {
+      const updated = { ...prev, ...updates };
+      if (updates.name) {
+        setSettings(s => ({ ...s, userName: updates.name! }));
+      }
+      return updated;
+    });
+  };
+
+  const openOnboarding = () => setIsOnboardingOpen(true);
+  const closeOnboarding = () => setIsOnboardingOpen(false);
+
+  const completeOnboarding = (data: {
+    name: string;
+    role: string;
+    quote?: string;
+    avatarStyle?: UserProfile['avatarStyle'];
+    tasks?: Array<{ title: string; categoryId: string; priority: Priority; estimatedMinutes: number }>;
+  }) => {
+    updateUserProfile({
+      name: data.name || 'Emily',
+      role: data.role || 'Productivity & Focus Explorer',
+      quote: data.quote || 'Small progress every day adds up to big results 🌱',
+      avatarStyle: data.avatarStyle || 'emily',
+      hasCompletedOnboarding: true
+    });
+
+    if (data.tasks && data.tasks.length > 0) {
+      const newTasks: Task[] = data.tasks.map((t, index) => ({
+        id: 'task-' + generateId(),
+        title: t.title,
+        categoryId: t.categoryId,
+        priority: t.priority || 'P2',
+        estimatedMinutes: t.estimatedMinutes || 30,
+        scheduledTime: index === 0 ? '09:00 AM' : index === 1 ? '11:00 AM' : index === 2 ? '02:00 PM' : '04:00 PM',
+        scheduledDuration: t.estimatedMinutes || 30,
+        status: 'scheduled',
+        createdAt: new Date().toISOString()
+      }));
+      setTasks(newTasks);
+    }
+
+    setIsOnboardingOpen(false);
+    try {
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    } catch (e) {}
+  };
+
+  const resetToNewUser = () => {
+    const freshProfile: UserProfile = {
+      ...INITIAL_USER_PROFILE,
+      hasCompletedOnboarding: false
+    };
+    setUserProfile(freshProfile);
+    setProjects(INITIAL_PROJECTS);
+    setReminders(INITIAL_REMINDERS);
+    setTasks(INITIAL_TASKS);
+    setIsOnboardingOpen(true);
+  };
+
+  // Projects Handlers
+  const addProject = (project: Omit<Project, 'id'>) => {
+    const newProj: Project = { ...project, id: 'proj-' + generateId() };
+    setProjects(prev => [...prev, newProj]);
+  };
+
+  const updateProject = (id: string, updates: Partial<Project>) => {
+    setProjects(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  const deleteProject = (id: string) => {
+    setProjects(prev => prev.filter(p => p.id !== id));
+  };
+
+  // Reminders Handlers
+  const addReminder = (reminder: Omit<Reminder, 'id'>) => {
+    const newRem: Reminder = { ...reminder, id: 'rem-' + generateId() };
+    setReminders(prev => [...prev, newRem]);
+  };
+
+  const updateReminder = (id: string, updates: Partial<Reminder>) => {
+    setReminders(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
+  };
+
+  const deleteReminder = (id: string) => {
+    setReminders(prev => prev.filter(r => r.id !== id));
+  };
 
   // Timer Tick Hook
   useEffect(() => {
@@ -447,6 +580,9 @@ export const MindSpaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setReflections(loadFromStorage(STORAGE_KEYS.REFLECTIONS, []));
       setSettings(loadFromStorage(STORAGE_KEYS.SETTINGS, INITIAL_SETTINGS));
       setMomentum(loadFromStorage(STORAGE_KEYS.MOMENTUM, INITIAL_MOMENTUM_STATS));
+      setProjects(loadFromStorage(STORAGE_KEYS.PROJECTS, INITIAL_PROJECTS));
+      setReminders(loadFromStorage(STORAGE_KEYS.REMINDERS, INITIAL_REMINDERS));
+      setUserProfile(loadFromStorage(STORAGE_KEYS.USER_PROFILE, INITIAL_USER_PROFILE));
     }
     return ok;
   };
@@ -460,11 +596,30 @@ export const MindSpaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setReflections([]);
     setSettings(INITIAL_SETTINGS);
     setMomentum(INITIAL_MOMENTUM_STATS);
+    setProjects(INITIAL_PROJECTS);
+    setReminders(INITIAL_REMINDERS);
+    setUserProfile(INITIAL_USER_PROFILE);
+    setIsOnboardingOpen(true);
   };
 
   return (
     <MindSpaceContext.Provider
       value={{
+        userProfile,
+        updateUserProfile,
+        isOnboardingOpen,
+        openOnboarding,
+        closeOnboarding,
+        completeOnboarding,
+        resetToNewUser,
+        projects,
+        addProject,
+        updateProject,
+        deleteProject,
+        reminders,
+        addReminder,
+        updateReminder,
+        deleteReminder,
         tasks,
         categories,
         addTask,
