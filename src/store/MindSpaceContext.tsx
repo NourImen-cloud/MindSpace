@@ -88,7 +88,9 @@ interface MindSpaceContextType {
   // Anti-Scrolling & Distraction Interception
   distractions: DistractionEvent[];
   appLimits: AppLimit[];
+  addAppLimit: (limit: Omit<AppLimit, 'id' | 'todayUsedMinutes'>) => void;
   updateAppLimit: (id: string, updates: Partial<AppLimit>) => void;
+  deleteAppLimit: (id: string) => void;
   activeIntercept: {
     isOpen: boolean;
     appName: string;
@@ -531,8 +533,21 @@ export const MindSpaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setActiveIntercept(null);
   };
 
+  const addAppLimit = (newLimit: Omit<AppLimit, 'id' | 'todayUsedMinutes'>) => {
+    const created: AppLimit = {
+      ...newLimit,
+      id: 'limit-' + generateId(),
+      todayUsedMinutes: 0
+    };
+    setAppLimits(prev => [...prev, created]);
+  };
+
   const updateAppLimit = (id: string, updates: Partial<AppLimit>) => {
     setAppLimits(prev => prev.map(limit => limit.id === id ? { ...limit, ...updates } : limit));
+  };
+
+  const deleteAppLimit = (id: string) => {
+    setAppLimits(prev => prev.filter(l => l.id !== id));
   };
 
   // Soundscape handlers
@@ -640,7 +655,9 @@ export const MindSpaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         dismissSummaryModal,
         distractions,
         appLimits,
+        addAppLimit,
         updateAppLimit,
+        deleteAppLimit,
         activeIntercept,
         triggerDistractionIntercept,
         setDistractionReason,

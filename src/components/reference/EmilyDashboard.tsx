@@ -454,16 +454,6 @@ export const EmilyDashboard: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2 self-end sm:self-center flex-wrap">
-                  {/* First-Time Setup / Personalize Button */}
-                  <button
-                    onClick={openOnboarding}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-black shadow-xs hover:opacity-95 transition-all active:scale-95"
-                    title="Run the First-Time Onboarding Flow to set tasks and check your schedule"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
-                    <span>New User Setup</span>
-                  </button>
-
                   {/* Check Schedule Button (Completely Distinct from Notifications!) */}
                   <button
                     onClick={() => setIsScheduleModalOpen(true)}
