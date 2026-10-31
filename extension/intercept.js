@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     returnBtn.addEventListener('click', () => {
       chrome.storage.local.get(['mindspace_app_url'], (data) => {
         const appUrl = data.mindspace_app_url || 'https://mindspace-tan-one.vercel.app';
-        window.location.href = appUrl;
+        window.location.href = appUrl + '?return_from=' + encodeURIComponent(appName);
       });
     });
   }
