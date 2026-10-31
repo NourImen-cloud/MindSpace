@@ -66,8 +66,8 @@
       box-shadow: 0 4px 12px rgba(109, 40, 217, 0.1);
     }
     @keyframes pulse {
-      0%, 100% { transform: scale(0.9); }
-      50% { transform: scale(1.1); }
+      0%, 100% { transform: scale(0.95); }
+      50% { transform: scale(1.08); }
     }
     h1 {
       font-size: 24px;
@@ -120,7 +120,7 @@
       color: #475569;
     }
     .hidden {
-      display: none;
+      display: none !important;
     }
     .reasons {
       display: grid;
@@ -139,7 +139,7 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .reason-btn:hover {
+    .reason-btn:hover, .reason-btn.active {
       border-color: #8B5CF6;
       background: #F5F3FF;
       color: #6D28D9;
@@ -157,17 +157,13 @@
         <div class="breathe-inner">☁️</div>
       </div>
 
-      <h1 id="title-text">You are reaching for Instagram</h1>
+      <h1 id="title-text">You are reaching for Instagram 🌸</h1>
       <p id="desc-text">
         Take a slow breath. Notice your impulse before your fingers start scrolling.
       </p>
 
-      <div id="countdown-btn" class="btn btn-secondary">
-        Pausing for <span id="countdown">5</span>s...
-      </div>
-
-      <button id="proceed-btn" class="btn btn-primary hidden">
-        I am ready to decide →
+      <button id="action-btn" class="btn btn-secondary">
+        Pausing for 5s... (Click to decide)
       </button>
     </div>
 
@@ -179,105 +175,26 @@
       <p>Acknowledge your current state and pick a nourishing direction.</p>
 
       <div class="reasons">
-        <button class="reason-btn" onclick="selectReason('Boredom')">🥱 Boredom</button>
-        <button class="reason-btn" onclick="selectReason('Avoiding Task')">😣 Avoiding Study</button>
-        <button class="reason-btn" onclick="selectReason('Habit')">🤖 Habitual Reflex</button>
-        <button class="reason-btn" onclick="selectReason('Need Break')">☕ Need a Break</button>
+        <button class="reason-btn" type="button">🥱 Boredom</button>
+        <button class="reason-btn" type="button">😣 Avoiding Study</button>
+        <button class="reason-btn" type="button">🤖 Habitual Reflex</button>
+        <button class="reason-btn" type="button">☕ Need a Break</button>
       </div>
 
-      <button id="return-sanctuary" class="btn btn-primary">
+      <button id="return-sanctuary" class="btn btn-primary" type="button">
         🚀 Return to MINDSPACE Study Sanctuary
       </button>
 
-      <button id="micro-focus" class="btn btn-secondary">
+      <button id="micro-focus" class="btn btn-secondary" type="button">
         ⏱️ Start 5-Minute Cozy Micro Focus
       </button>
 
-      <button id="allow-access" class="btn btn-ghost">
+      <button id="allow-access" class="btn btn-ghost" type="button">
         Continue to <span id="site-name">Instagram</span> for 10 minutes
       </button>
     </div>
   </div>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const appName = params.get('app') || 'Social Media';
-    const domain = params.get('domain') || 'instagram.com';
-    const targetUrl = params.get('target') || 'https://' + domain;
-
-    document.getElementById('title-text').innerText = 'You are reaching for ' + appName + ' 🌸';
-    document.getElementById('site-name').innerText = appName;
-
-    // Web Audio API Calming Bell Sound
-    function playGentleBell() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(528, audioCtx.currentTime); // 528Hz Solfeggio Love frequency
-        gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 3.0);
-      } catch (e) {}
-    }
-
-    playGentleBell();
-
-    // 5-Second Breathing Countdown
-    let secondsLeft = 5;
-    const countdownEl = document.getElementById('countdown');
-    const countdownBtn = document.getElementById('countdown-btn');
-    const proceedBtn = document.getElementById('proceed-btn');
-
-    const interval = setInterval(() => {
-      secondsLeft--;
-      if (countdownEl) countdownEl.innerText = secondsLeft;
-      if (secondsLeft <= 0) {
-        clearInterval(interval);
-        countdownBtn.classList.add('hidden');
-        proceedBtn.classList.remove('hidden');
-      }
-    }, 1000);
-
-    proceedBtn.addEventListener('click', () => {
-      document.getElementById('stage-pause').classList.add('hidden');
-      document.getElementById('stage-choices').classList.remove('hidden');
-    });
-
-    function selectReason(reason) {
-      // visual feedback
-    }
-
-    // 1. Return to MindSpace Sanctuary
-    document.getElementById('return-sanctuary').addEventListener('click', () => {
-      chrome.storage.local.get(['mindspace_app_url'], (data) => {
-        const appUrl = data.mindspace_app_url || 'http://localhost:4173';
-        window.location.href = appUrl;
-      });
-    });
-
-    // 2. Micro Focus 5m
-    document.getElementById('micro-focus').addEventListener('click', () => {
-      chrome.storage.local.get(['mindspace_app_url'], (data) => {
-        const appUrl = data.mindspace_app_url || 'http://localhost:4173';
-        window.location.href = appUrl + '?focus=5';
-      });
-    });
-
-    // 3. Allow temporary 10-minute access
-    document.getElementById('allow-access').addEventListener('click', () => {
-      chrome.runtime.sendMessage({
-        action: 'allow_temp_access',
-        domain: domain,
-        minutes: 10
-      }, () => {
-        window.location.href = targetUrl;
-      });
-    });
-  </script>
+  <script src="intercept.js"></script>
 </body>
 </html>

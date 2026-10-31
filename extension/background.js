@@ -18,7 +18,7 @@ chrome.runtime.onInstalled.addListener(() => {
       chrome.storage.local.set({ 
         mindspace_rules: DEFAULT_RULES,
         mindspace_active: true,
-        mindspace_app_url: 'http://localhost:4173'
+        mindspace_app_url: 'https://mindspace-tan-one.vercel.app'
       });
     }
   });
