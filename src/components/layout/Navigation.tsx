@@ -1,70 +1,86 @@
 import React from 'react';
 import { 
-  LayoutDashboard, 
-  CheckSquare, 
+  Home, 
   Calendar, 
+  Plus, 
+  Clock, 
+  BarChart2, 
   ShieldAlert, 
-  Hourglass, 
   Compass, 
-  BarChart3, 
   BookHeart, 
-  Settings 
+  Settings,
+  Sparkles,
+  Heart
 } from 'lucide-react';
 import { useMindSpace } from '../../store/MindSpaceContext';
+import { CuteKittenMascot } from '../common/AestheticAssets';
 
 export const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
-  { id: 'tasks', label: 'Activities & Tasks', icon: CheckSquare },
-  { id: 'planner', label: 'Daily Planner', icon: Calendar },
+  { id: 'dashboard', label: 'Home', icon: Home },
+  { id: 'planner', label: 'Planner', icon: Calendar },
+  { id: 'tasks', label: 'Tasks & Subjects', icon: Plus, isAction: true },
+  { id: 'focus', label: 'Focus Timer', icon: Clock },
+  { id: 'wellbeing', label: 'Progress & Stats', icon: BarChart2 },
   { id: 'antiscroll', label: 'Anti-Scrolling', icon: ShieldAlert, highlight: true },
-  { id: 'focus', label: 'Focus & Timer', icon: Hourglass },
   { id: 'alternatives', label: 'Alternatives', icon: Compass },
-  { id: 'wellbeing', label: 'Digital Wellbeing', icon: BarChart3 },
-  { id: 'reflection', label: 'Weekly Reflection', icon: BookHeart },
-  { id: 'settings', label: 'Privacy & Sync', icon: Settings },
+  { id: 'reflection', label: 'Reflection', icon: BookHeart },
+  { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
 export const Navigation: React.FC = () => {
   const { currentTab, setCurrentTab } = useMindSpace();
 
   return (
-    <aside className="w-full md:w-64 bg-slate-900/90 border-r border-slate-800/80 p-3 flex flex-col justify-between shrink-0">
-      <div className="space-y-1">
-        <div className="px-3 py-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
-          Mindful Navigation
+    <aside className="w-full md:w-64 bg-white/70 backdrop-blur-md border-r border-purple-100 p-3.5 flex flex-col justify-between shrink-0 shadow-[4px_0_24px_rgba(139,92,246,0.02)]">
+      <div className="space-y-1.5">
+        <div className="px-3 py-2 text-[11px] font-extrabold tracking-wider text-purple-400 uppercase flex items-center justify-between">
+          <span>Navigation</span>
+          <Sparkles className="w-3 h-3 text-purple-400" />
         </div>
+
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = currentTab === item.id;
+
           return (
             <button
               key={item.id}
               onClick={() => setCurrentTab(item.id)}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all text-left group ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-left group ${
                 isActive
-                  ? 'bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/25 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
+                  ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-200'
+                  : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50/70'
               }`}
             >
-              <Icon className={`w-4 h-4 shrink-0 transition-colors ${
-                isActive ? 'text-emerald-400' : 'text-slate-400 group-hover:text-slate-300'
-              }`} />
+              <div className={`p-1.5 rounded-xl transition-colors ${
+                isActive 
+                  ? 'bg-white/20 text-white' 
+                  : 'bg-purple-100/60 text-purple-600 group-hover:bg-purple-200/60'
+              }`}>
+                <Icon className="w-4 h-4" />
+              </div>
+
               <span className="truncate">{item.label}</span>
+
               {item.highlight && (
-                <span className="ml-auto w-2 h-2 rounded-full bg-emerald-400 animate-ping opacity-75" />
+                <span className="ml-auto text-[9px] font-extrabold uppercase bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full border border-pink-200">
+                  Shield
+                </span>
               )}
             </button>
           );
         })}
       </div>
 
-      {/* Gentle Mindfulness Prompt at the bottom of navigation */}
-      <div className="hidden md:block mt-6 p-3 rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-800 text-[11px] text-slate-400">
-        <div className="font-medium text-slate-300 mb-1 flex items-center gap-1.5">
-          <span>🌿 Gentle Reminder</span>
+      {/* Cute Kitten Study Mascot Card at bottom of sidebar (matching screenshot sticker!) */}
+      <div className="hidden md:flex flex-col items-center text-center mt-6 p-4 rounded-3xl bg-gradient-to-b from-purple-50 to-pink-50/50 border border-purple-100 shadow-sm relative overflow-hidden">
+        <CuteKittenMascot className="w-14 h-14" />
+        <div className="mt-2 text-xs font-bold text-purple-900 flex items-center gap-1">
+          <span>Aiko's Note</span>
+          <Heart className="w-3 h-3 text-pink-500 fill-pink-500" />
         </div>
-        <p className="leading-relaxed">
-          Attention is your most finite resource. Be kind to yourself when you wander; the victory is in the return.
+        <p className="text-[11px] text-purple-700/80 mt-1 leading-snug font-medium italic">
+          "Small steps every day lead to big results! 🐾"
         </p>
       </div>
     </aside>

@@ -1,4 +1,4 @@
-export type Priority = 'P1' | 'P2' | 'P3' | 'P4'; // P1: Urgent & Important, P2: High, P3: Medium, P4: Low
+export type Priority = 'P1' | 'P2' | 'P3' | 'P4'; // P1: Urgent, P2: High, P3: Medium, P4: Low
 
 export type TaskStatus = 'backlog' | 'scheduled' | 'in_progress' | 'completed';
 
@@ -19,7 +19,7 @@ export interface Task {
   priority: Priority;
   estimatedMinutes: number;
   actualMinutes?: number;
-  scheduledTime?: string; // e.g. "09:30"
+  scheduledTime?: string; // e.g. "09:00 AM"
   scheduledDuration?: number; // minutes
   status: TaskStatus;
   createdAt: string;
@@ -120,7 +120,7 @@ export interface UserSettings {
   localOnlyMode: boolean;
   deviceSyncId: string;
   telemetryEnabled: boolean;
-  viewMode: 'desktop' | 'mobile_preview';
+  viewMode: 'desktop' | 'mobile_preview' | 'showcase';
 }
 
 export interface ReturnMomentumStats {
@@ -128,5 +128,6 @@ export interface ReturnMomentumStats {
   currentMomentumScore: number;
   screenTimeSavedMinutes: number;
   mindfulChoicesCount: number;
+  studyStreakDays: number;
   lastReturnTimestamp?: string;
 }

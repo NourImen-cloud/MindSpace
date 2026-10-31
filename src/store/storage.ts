@@ -12,109 +12,129 @@ import {
 
 export const DEFAULT_CATEGORIES: Category[] = [
   {
-    id: 'cat-studies',
-    name: 'University & Studies',
-    color: '#10b981', // Emerald
-    icon: 'GraduationCap',
-    description: 'Coursework, assignments, exam preparation, and lectures'
+    id: 'cat-math',
+    name: 'Mathematics',
+    color: '#8B5CF6', // Lilac purple
+    icon: 'Calculator',
+    description: 'Calculus, algebra, problem sets, and theorems'
   },
   {
-    id: 'cat-projects',
-    name: 'Personal Projects',
-    color: '#8b5cf6', // Violet
-    icon: 'FolderKanban',
-    description: 'Creative apps, portfolio, building things that matter'
+    id: 'cat-bio',
+    name: 'Biology',
+    color: '#10B981', // Mint green
+    icon: 'Leaf',
+    description: 'Cell structure, genetics, lab reviews, and notes'
   },
   {
-    id: 'cat-research',
-    name: 'Research & Writing',
-    color: '#0ea5e9', // Sky Blue
-    icon: 'FlaskConical',
-    description: 'Literature review, note synthesis, experimental work'
+    id: 'cat-history',
+    name: 'History',
+    color: '#F43F5E', // Coral rose
+    icon: 'Landmark',
+    description: 'World history, primary sources, and timelines'
   },
   {
-    id: 'cat-learning',
-    name: 'Self-Learning',
-    color: '#f59e0b', // Amber
+    id: 'cat-physics',
+    name: 'Physics',
+    color: '#6366F1', // Soft electric indigo
+    icon: 'Atom',
+    description: 'Mechanics, electromagnetism, and problem sheets'
+  },
+  {
+    id: 'cat-english',
+    name: 'English & Literature',
+    color: '#F59E0B', // Warm butter amber
     icon: 'BookOpen',
-    description: 'Books, online courses, languages, technical skills'
+    description: 'Essay writing, reading, and literature analysis'
   },
   {
-    id: 'cat-hobbies',
-    name: 'Hobbies & Personal',
-    color: '#ec4899', // Pink
+    id: 'cat-wellbeing',
+    name: 'Personal & Rest',
+    color: '#EC4899', // Sakura pink
     icon: 'Sparkles',
-    description: 'Music, sports, meditation, cooking, and leisure'
+    description: 'Mindful walks, journaling, meditation, and creative art'
   }
 ];
 
 export const INITIAL_TASKS: Task[] = [
   {
     id: 'task-1',
-    title: 'Review Machine Learning Chapter 4: Neural Architectures',
-    description: 'Summarize backpropagation and attention mechanisms in my research notebook.',
-    categoryId: 'cat-studies',
+    title: 'Complete Math: Exercise set 1',
+    description: 'Differential equations and integration by parts exercises 1 through 15.',
+    categoryId: 'cat-math',
     priority: 'P1',
-    estimatedMinutes: 50,
-    scheduledTime: '09:30',
-    scheduledDuration: 50,
+    estimatedMinutes: 45,
+    scheduledTime: '09:00 AM',
+    scheduledDuration: 45,
     status: 'scheduled',
     createdAt: new Date().toISOString(),
-    tags: ['Exams', 'Deep Work'],
+    tags: ['Exercises', 'Problem Set'],
     energyLevel: 'high'
   },
   {
     id: 'task-2',
-    title: 'Design Database Schema for MindSpace Sync Protocol',
-    description: 'Specify offline SQLite / IndexedDB entity relations and conflict resolution.',
-    categoryId: 'cat-projects',
-    priority: 'P2',
-    estimatedMinutes: 45,
-    scheduledTime: '11:00',
-    scheduledDuration: 45,
-    status: 'scheduled',
-    createdAt: new Date().toISOString(),
-    tags: ['Architecture', 'Dev'],
-    energyLevel: 'high'
-  },
-  {
-    id: 'task-3',
-    title: 'Literature Search: Cognitive Friction in Digital Habit Reversal',
-    description: 'Collect 3 recent peer-reviewed articles on intentional pauses and impulse delays.',
-    categoryId: 'cat-research',
+    title: 'Revise Biology Notes: Chapter 4',
+    description: 'Cell structure, organelle functions, and membrane transport summary.',
+    categoryId: 'cat-bio',
     priority: 'P2',
     estimatedMinutes: 35,
-    scheduledTime: '14:00',
+    scheduledTime: '11:30 AM',
     scheduledDuration: 35,
     status: 'scheduled',
     createdAt: new Date().toISOString(),
-    tags: ['Reading', 'Paper'],
+    tags: ['Chapter 4', 'Notes'],
+    energyLevel: 'medium'
+  },
+  {
+    id: 'task-3',
+    title: 'Read History Chapter: The First World War',
+    description: 'Alliance systems, geopolitical triggers, and treaty ramifications.',
+    categoryId: 'cat-history',
+    priority: 'P2',
+    estimatedMinutes: 30,
+    scheduledTime: '02:00 PM',
+    scheduledDuration: 30,
+    status: 'scheduled',
+    createdAt: new Date().toISOString(),
+    tags: ['Read', 'World War I'],
     energyLevel: 'medium'
   },
   {
     id: 'task-4',
-    title: 'Practice 20 minutes Spanish conversation vocabulary',
-    description: 'Review Anki spaced repetition deck for conversational idioms.',
-    categoryId: 'cat-learning',
-    priority: 'P3',
-    estimatedMinutes: 20,
-    status: 'backlog',
+    title: 'Physics Numericals: Motion in a Straight Line',
+    description: 'Kinematics formulas, displacement vectors, and acceleration curves.',
+    categoryId: 'cat-physics',
+    priority: 'P2',
+    estimatedMinutes: 40,
+    scheduledTime: '04:30 PM',
+    scheduledDuration: 40,
+    status: 'scheduled',
     createdAt: new Date().toISOString(),
-    tags: ['Language', 'Anki'],
-    energyLevel: 'low'
+    tags: ['Practice', 'Kinematics'],
+    energyLevel: 'high'
   },
   {
     id: 'task-5',
-    title: 'Afternoon Mindful Walk & Sunlight Exposure',
-    description: 'Step outside without headphones to rest optic nerves and reset mental fatigue.',
-    categoryId: 'cat-hobbies',
+    title: 'English Assignment: Literature Essay',
+    description: 'First draft of the comparative thematic essay on character symbolism.',
+    categoryId: 'cat-english',
     priority: 'P3',
-    estimatedMinutes: 20,
-    scheduledTime: '16:00',
-    scheduledDuration: 20,
-    status: 'scheduled',
+    estimatedMinutes: 45,
+    status: 'backlog',
     createdAt: new Date().toISOString(),
-    tags: ['Wellbeing', 'Rest'],
+    tags: ['Essay', 'Draft'],
+    energyLevel: 'medium'
+  },
+  {
+    id: 'task-6',
+    title: 'Afternoon Tea & Desk Spinal Stretch 🍵',
+    description: 'Warm matcha or herbal tea, shoulder rolls, and resting the eyes from screens.',
+    categoryId: 'cat-wellbeing',
+    priority: 'P4',
+    estimatedMinutes: 15,
+    status: 'completed',
+    createdAt: new Date().toISOString(),
+    completedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+    tags: ['Rest', 'Tea'],
     energyLevel: 'low'
   }
 ];
@@ -144,7 +164,7 @@ export const INITIAL_APP_LIMITS: AppLimit[] = [
     id: 'limit-3',
     appName: 'Reddit',
     dailyLimitMinutes: 30,
-    todayUsedMinutes: 24,
+    todayUsedMinutes: 22,
     icon: 'MessageCircle',
     blocked: false,
     strictLock: false,
@@ -162,9 +182,9 @@ export const INITIAL_APP_LIMITS: AppLimit[] = [
   },
   {
     id: 'limit-5',
-    appName: 'News Portals & Feeds',
+    appName: 'Web Feeds & News',
     dailyLimitMinutes: 20,
-    todayUsedMinutes: 8,
+    todayUsedMinutes: 9,
     icon: 'Newspaper',
     blocked: false,
     strictLock: false,
@@ -175,8 +195,8 @@ export const INITIAL_APP_LIMITS: AppLimit[] = [
 export const INITIAL_ALTERNATIVES: AlternativeActivity[] = [
   {
     id: 'alt-1',
-    title: 'Two-Minute Box Breathing',
-    description: 'Inhale 4s, hold 4s, exhale 4s, hold 4s. Instantly reduces nervous system agitation.',
+    title: 'Two-Minute Box Breathing 🌸',
+    description: 'Inhale 4s, hold 4s, exhale 4s, hold 4s. Calms the nervous system gently.',
     durationMinutes: 3,
     category: 'mindful',
     icon: 'Wind',
@@ -184,8 +204,8 @@ export const INITIAL_ALTERNATIVES: AlternativeActivity[] = [
   },
   {
     id: 'alt-2',
-    title: 'Hydrate & Desk Spinal Stretch',
-    description: 'Drink a full glass of cold water and stretch neck, shoulders, and lower back.',
+    title: 'Hydrate & Make a Warm Tea 🍵',
+    description: 'Brew warm herbal or green tea and stretch neck, shoulders, and back.',
     durationMinutes: 5,
     category: 'physical',
     icon: 'Droplet',
@@ -193,8 +213,8 @@ export const INITIAL_ALTERNATIVES: AlternativeActivity[] = [
   },
   {
     id: 'alt-3',
-    title: 'Review 1 Study Flashcard or Concept',
-    description: 'Pick one difficult formula or vocabulary item and test your recall.',
+    title: 'Review 1 Study Flashcard 🧠',
+    description: 'Pick one difficult formula, definition, or vocabulary card to review.',
     durationMinutes: 5,
     category: 'learning',
     icon: 'Brain',
@@ -202,8 +222,8 @@ export const INITIAL_ALTERNATIVES: AlternativeActivity[] = [
   },
   {
     id: 'alt-4',
-    title: 'Quick Brain-Dump Journaling',
-    description: 'Write whatever thought or anxiety is pulling your attention onto a physical note.',
+    title: 'Brain-Dump Journaling 📝',
+    description: 'Write whatever thought or anxiety is pulling your attention onto paper.',
     durationMinutes: 5,
     category: 'restorative',
     icon: 'PenTool',
@@ -211,8 +231,8 @@ export const INITIAL_ALTERNATIVES: AlternativeActivity[] = [
   },
   {
     id: 'alt-5',
-    title: '5-Minute Micro Focus Session',
-    description: 'Open your current task and promise to work for just 300 seconds without judgement.',
+    title: '5-Minute Cozy Micro Focus ⏱️',
+    description: 'Work on your current task for just 300 seconds without pressure or guilt.',
     durationMinutes: 5,
     category: 'learning',
     icon: 'Flame',
@@ -220,8 +240,8 @@ export const INITIAL_ALTERNATIVES: AlternativeActivity[] = [
   },
   {
     id: 'alt-6',
-    title: 'Look out the Window at 20-20 Distance',
-    description: 'Rest eye convergence by staring at the furthest tree or horizon line.',
+    title: 'Look out the Window at the Clouds ☁️',
+    description: 'Rest optic convergence by staring at distant trees or the sky.',
     durationMinutes: 3,
     category: 'restorative',
     icon: 'Eye',
@@ -229,8 +249,8 @@ export const INITIAL_ALTERNATIVES: AlternativeActivity[] = [
   },
   {
     id: 'alt-7',
-    title: 'Brisk 10-Minute Outdoor Stroll',
-    description: 'Get natural ambient light and fresh air to restore dopamine baseline naturally.',
+    title: 'Brisk 10-Minute Walk Outside 🐾',
+    description: 'Natural ambient light and gentle movement restore dopamine baseline.',
     durationMinutes: 10,
     category: 'physical',
     icon: 'Footprints',
@@ -278,7 +298,7 @@ export const INITIAL_DISTRACTION_EVENTS: DistractionEvent[] = [
 ];
 
 export const INITIAL_SETTINGS: UserSettings = {
-  userName: 'Alex',
+  userName: 'Aiko',
   focusPresetMinutes: 25,
   breakDurationMinutes: 5,
   enableSoundEffects: true,
@@ -300,19 +320,20 @@ export const INITIAL_MOMENTUM_STATS: ReturnMomentumStats = {
   currentMomentumScore: 85,
   screenTimeSavedMinutes: 125,
   mindfulChoicesCount: 19,
+  studyStreakDays: 12,
   lastReturnTimestamp: new Date().toISOString()
 };
 
 export const STORAGE_KEYS = {
-  TASKS: 'mindspace_tasks',
-  CATEGORIES: 'mindspace_categories',
-  SESSIONS: 'mindspace_sessions',
-  DISTRACTIONS: 'mindspace_distractions',
-  APP_LIMITS: 'mindspace_limits',
-  ALTERNATIVES: 'mindspace_alternatives',
-  REFLECTIONS: 'mindspace_reflections',
-  SETTINGS: 'mindspace_settings',
-  MOMENTUM: 'mindspace_momentum',
+  TASKS: 'mindspace_tasks_v2',
+  CATEGORIES: 'mindspace_categories_v2',
+  SESSIONS: 'mindspace_sessions_v2',
+  DISTRACTIONS: 'mindspace_distractions_v2',
+  APP_LIMITS: 'mindspace_limits_v2',
+  ALTERNATIVES: 'mindspace_alternatives_v2',
+  REFLECTIONS: 'mindspace_reflections_v2',
+  SETTINGS: 'mindspace_settings_v2',
+  MOMENTUM: 'mindspace_momentum_v2',
 };
 
 // Safe Local-First Storage Helpers
@@ -337,7 +358,7 @@ export function saveToStorage<T>(key: string, value: T): void {
 
 export function exportAllData(): string {
   const data = {
-    version: '1.0.0',
+    version: '2.0.0',
     exportedAt: new Date().toISOString(),
     tasks: loadFromStorage(STORAGE_KEYS.TASKS, INITIAL_TASKS),
     categories: loadFromStorage(STORAGE_KEYS.CATEGORIES, DEFAULT_CATEGORIES),

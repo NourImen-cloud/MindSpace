@@ -15,9 +15,23 @@ import { SettingsView } from './components/settings/SettingsView';
 import { IntentionalPauseModal } from './components/antiscroll/IntentionalPauseModal';
 import { FocusModeModal } from './components/focus/FocusModeModal';
 import { FocusSummaryModal } from './components/focus/FocusSummaryModal';
+import { AppShowcaseView } from './components/showcase/AppShowcaseView';
 
 const MainContent: React.FC = () => {
-  const { currentTab } = useMindSpace();
+  const { currentTab, settings } = useMindSpace();
+
+  if (settings.viewMode === 'showcase') {
+    return (
+      <div className="min-h-screen bg-[#FAF7FD]">
+        <Header />
+        <AppShowcaseView />
+        {/* Global Overlays */}
+        <IntentionalPauseModal />
+        <FocusModeModal />
+        <FocusSummaryModal />
+      </div>
+    );
+  }
 
   const renderActiveTab = () => {
     switch (currentTab) {
@@ -45,7 +59,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
+    <div className="min-h-screen bg-[#FAF7FD] text-slate-800 flex flex-col font-sans selection:bg-purple-200 selection:text-purple-900">
       <Header />
 
       <div className="flex-1 flex flex-col md:flex-row">

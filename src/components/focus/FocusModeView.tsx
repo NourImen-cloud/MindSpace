@@ -1,194 +1,226 @@
 import React, { useState } from 'react';
 import { 
-  Hourglass, 
+  ChevronLeft, 
+  Settings as SettingsIcon, 
   Play, 
-  Sliders, 
-  Sparkles, 
-  Volume2, 
-  Layers, 
-  BookmarkCheck,
-  CheckCircle2
+  Pause, 
+  Music, 
+  FileText, 
+  BarChart2, 
+  Sparkles,
+  Volume2,
+  VolumeX,
+  Sliders,
+  BookmarkPlus
 } from 'lucide-react';
 import { useMindSpace } from '../../store/MindSpaceContext';
-import { Task } from '../../types';
+import { CozyStudyGirlIllustration } from '../common/AestheticAssets';
+import { formatSecondsToTimer } from '../../utils/formatters';
+import { DistractionParkingLot } from './DistractionParkingLot';
 
 export const FocusModeView: React.FC = () => {
   const { 
     tasks, 
     startFocusSession, 
+    activeFocusSession, 
+    isTimerRunning, 
+    focusSecondsRemaining, 
+    pauseFocusTimer, 
+    resumeFocusTimer, 
+    stopFocusSession,
     currentAmbient, 
     setAmbientSound, 
-    ambientVolume, 
-    setAmbientVolume,
-    settings 
+    settings,
+    setCurrentTab
   } = useMindSpace();
 
-  const [selectedDuration, setSelectedDuration] = useState<number>(settings.focusPresetMinutes || 25);
-  const [selectedTaskId, setSelectedTaskId] = useState<string>(
-    tasks.find(t => t.status === 'scheduled')?.id || tasks[0]?.id || ''
-  );
+  const [activeTabMode, setActiveTabMode] = useState<'pomodoro' | 'short_break' | 'long_break'>('pomodoro');
+  const [selectedMinutes, setSelectedMinutes] = useState(25);
+  const [showParkingLotDrawer, setShowParkingLotDrawer] = useState(false);
 
-  const presets = [
-    { label: 'Micro (15m)', value: 15, desc: 'Ultra-low friction jumpstart' },
-    { label: 'Standard (25m)', value: 25, desc: 'Balanced single-task sprint' },
-    { label: 'Deep (45m)', value: 45, desc: 'Unbroken analytical problem solving' },
-    { label: 'Extended (60m)', value: 60, desc: 'Immersion writing & architecture' },
-  ];
+  const activeTask = tasks.find(t => t.status === 'scheduled') || tasks[0];
 
-  const activeTask = tasks.find(t => t.id === selectedTaskId);
+  const handleTabChange = (mode: 'pomodoro' | 'short_break' | 'long_break') => {
+    setActiveTabMode(mode);
+    if (mode === 'pomodoro') setSelectedMinutes(25);
+    else if (mode === 'short_break') setSelectedMinutes(5);
+    else setSelectedMinutes(15);
+  };
 
-  const handleLaunch = () => {
-    startFocusSession(activeTask, selectedDuration);
+  const isSessionActive = Boolean(activeFocusSession);
+
+  const handleStartOrToggle = () => {
+    if (!isSessionActive) {
+      startFocusSession(activeTask, selectedMinutes);
+    } else {
+      if (isTimerRunning) {
+        pauseFocusTimer();
+      } else {
+        resumeFocusTimer();
+      }
+    }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-          <Hourglass className="w-5 h-5 text-emerald-400" />
-          <span>Focus Mode & Attention Sanctuary</span>
+    <div className="space-y-6 max-w-md mx-auto animate-fadeIn text-center">
+      {/* 1. Header with back and settings icon (Exact match to screenshot) */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => setCurrentTab('dashboard')}
+          className="p-2 rounded-2xl bg-white border border-purple-100 text-slate-700 hover:text-purple-600 shadow-xs transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
+        <h2 className="text-lg font-black text-slate-800 font-['Quicksand',sans-serif]">
+          Focus Timer
         </h2>
-        <p className="text-xs text-slate-400">
-          Tailor your focus duration without rigid one-size-fits-all dogmas.
+
+        <button
+          onClick={() => setCurrentTab('settings')}
+          className="p-2 rounded-2xl bg-white border border-purple-100 text-slate-700 hover:text-purple-600 shadow-xs transition-colors"
+        >
+          <SettingsIcon className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* 2. Mode Pill Tabs: [ Pomodoro ] [ Short Break ] (Exact match to screenshot) */}
+      <div className="flex items-center justify-center p-1.5 bg-white rounded-full border border-purple-100 shadow-xs max-w-xs mx-auto">
+        <button
+          onClick={() => handleTabChange('pomodoro')}
+          className={`flex-1 py-2 px-3 rounded-full text-xs font-extrabold transition-all ${
+            activeTabMode === 'pomodoro'
+              ? 'bg-purple-600 text-white shadow-sm'
+              : 'text-purple-600/70 hover:text-purple-700'
+          }`}
+        >
+          Pomodoro
+        </button>
+        <button
+          onClick={() => handleTabChange('short_break')}
+          className={`flex-1 py-2 px-3 rounded-full text-xs font-extrabold transition-all ${
+            activeTabMode === 'short_break'
+              ? 'bg-purple-600 text-white shadow-sm'
+              : 'text-purple-600/70 hover:text-purple-700'
+          }`}
+        >
+          Short Break
+        </button>
+      </div>
+
+      {/* 3. Center Circular Anime Illustration (Exact match to screenshot cozy study anime girl in frame) */}
+      <div className="relative mx-auto w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center">
+        {/* Soft pastel ring with gentle glow */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-purple-200 via-pink-100 to-indigo-100 p-1 shadow-inner animate-breathe" />
+
+        <div className="relative w-[92%] h-[92%] rounded-full bg-[#FAF7FD] border-2 border-white shadow-md overflow-hidden flex items-center justify-center">
+          <CozyStudyGirlIllustration className="w-48 h-48 sm:w-56 sm:h-56" />
+        </div>
+
+        {/* Ambient floating sparkles */}
+        <span className="absolute top-2 right-4 text-sm animate-bounce">✨</span>
+        <span className="absolute bottom-6 left-4 text-xs animate-pulse">🌸</span>
+      </div>
+
+      {/* 4. Bold Timer Display (Exact match to 25:00 in screenshot) */}
+      <div className="space-y-1">
+        <div className="font-extrabold text-5xl sm:text-6xl text-slate-800 tracking-tight font-['Quicksand',sans-serif]">
+          {isSessionActive 
+            ? formatSecondsToTimer(focusSecondsRemaining)
+            : `${selectedMinutes.toString().padStart(2, '0')}:00`
+          }
+        </div>
+        <p className="text-xs font-semibold text-purple-600/90 flex items-center justify-center gap-1">
+          <span>Focus on your goal!</span>
+          <Sparkles className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
         </p>
+
+        {activeTask && (
+          <div className="text-[11px] text-slate-500 font-medium">
+            Anchor: <strong className="text-purple-700">{activeTask.title}</strong>
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Duration Presets & Custom Slider */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-teal-400" />
-              <span>Select Focus Duration</span>
-            </h3>
+      {/* 5. Big Purple Pill Start Button (Exact match to screenshot Start button) */}
+      <div className="pt-1 max-w-xs mx-auto">
+        <button
+          onClick={handleStartOrToggle}
+          className="w-full py-3.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm shadow-lg shadow-purple-300 transition-all active:scale-95 flex items-center justify-center gap-2"
+        >
+          {isSessionActive && isTimerRunning ? (
+            <>
+              <Pause className="w-4 h-4 fill-current" />
+              <span>Pause Focus</span>
+            </>
+          ) : (
+            <>
+              <Play className="w-4 h-4 fill-current" />
+              <span>{isSessionActive ? 'Resume' : 'Start'}</span>
+            </>
+          )}
+        </button>
 
-            {/* Presets Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {presets.map(p => (
-                <button
-                  key={p.value}
-                  onClick={() => setSelectedDuration(p.value)}
-                  className={`p-3.5 rounded-2xl border text-left transition-all ${
-                    selectedDuration === p.value
-                      ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 font-semibold shadow-md'
-                      : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <div className="text-xs font-bold">{p.label}</div>
-                  <div className="text-[10px] text-slate-400 mt-1">{p.desc}</div>
-                </button>
-              ))}
-            </div>
-
-            {/* Custom slider */}
-            <div className="space-y-1.5 pt-2">
-              <div className="flex justify-between text-xs text-slate-400">
-                <span>Fine-tune minutes:</span>
-                <span className="font-mono text-emerald-400 font-bold">{selectedDuration} minutes</span>
-              </div>
-              <input
-                type="range"
-                min={5}
-                max={90}
-                step={5}
-                value={selectedDuration}
-                onChange={e => setSelectedDuration(Number(e.target.value))}
-                className="w-full accent-emerald-500 cursor-pointer"
-              />
-            </div>
-          </div>
-
-          {/* Select Anchor Task */}
-          <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-indigo-400" />
-              <span>Choose Anchor Task for this Session</span>
-            </h3>
-
-            <div className="space-y-2 max-h-56 overflow-y-auto">
-              {tasks.filter(t => t.status !== 'completed').map(task => {
-                const isSelected = selectedTaskId === task.id;
-                return (
-                  <button
-                    key={task.id}
-                    onClick={() => setSelectedTaskId(task.id)}
-                    className={`w-full p-3 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 ${
-                      isSelected
-                        ? 'bg-indigo-500/15 border-indigo-500/40 text-indigo-200 font-semibold'
-                        : 'bg-slate-800/40 border-slate-700/50 text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    <div className="truncate">
-                      <div className="text-xs font-medium text-slate-200 truncate">{task.title}</div>
-                      <div className="text-[10px] text-slate-400">{task.estimatedMinutes}m estimated</div>
-                    </div>
-                    {isSelected && (
-                      <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Ambient Soundscape & Launch button */}
-        <div className="space-y-6">
-          <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-              <Volume2 className="w-4 h-4 text-teal-400" />
-              <span>Synthesized Ambient Sound</span>
-            </h3>
-            <p className="text-xs text-slate-400">
-              Generative acoustic masking to drown out distracting environments.
-            </p>
-
-            <div className="grid grid-cols-2 gap-2">
-              {(['none', 'rain', 'forest', 'brown_noise'] as const).map(type => (
-                <button
-                  key={type}
-                  onClick={() => setAmbientSound(type)}
-                  className={`p-2.5 rounded-xl border text-xs capitalize font-medium transition-all ${
-                    currentAmbient === type
-                      ? 'bg-teal-500/15 border-teal-500/40 text-teal-300 font-semibold'
-                      : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {type === 'brown_noise' ? 'Warm Drone' : type === 'none' ? 'Mute' : type}
-                </button>
-              ))}
-            </div>
-
-            {currentAmbient !== 'none' && (
-              <div className="space-y-1.5 pt-1">
-                <div className="flex justify-between text-xs text-slate-400">
-                  <span>Volume:</span>
-                  <span className="font-mono text-teal-400">{Math.round(ambientVolume * 100)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min={0.05}
-                  max={1}
-                  step={0.05}
-                  value={ambientVolume}
-                  onChange={e => setAmbientVolume(Number(e.target.value))}
-                  className="w-full accent-teal-500 cursor-pointer"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Launch Big Button */}
+        {isSessionActive && (
           <button
-            onClick={handleLaunch}
-            className="w-full py-4 rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-emerald-950/50 transition-all flex items-center justify-center gap-2 active:scale-98"
+            onClick={() => stopFocusSession(true)}
+            className="mt-2 text-xs font-bold text-purple-600 hover:text-purple-800"
           >
-            <Play className="w-5 h-5 fill-current" />
-            <span>Enter Focus Sanctuary ({selectedDuration}m)</span>
+            Complete Session Early ✨
           </button>
-        </div>
+        )}
       </div>
+
+      {/* 6. Bottom 3 Control Icons (Exact match to screenshot: Ambient, Tasks, Stats) */}
+      <div className="flex items-center justify-center gap-6 pt-2">
+        {/* Ambient audio toggle */}
+        <button
+          onClick={() => {
+            if (currentAmbient === 'none') setAmbientSound('rain');
+            else setAmbientSound('none');
+          }}
+          className={`flex flex-col items-center gap-1 text-[11px] font-bold transition-colors ${
+            currentAmbient !== 'none' ? 'text-purple-600' : 'text-slate-400 hover:text-purple-500'
+          }`}
+          title="Toggle Ambient Lo-fi Sound"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-white border border-purple-100 flex items-center justify-center shadow-xs">
+            <Music className="w-5 h-5" />
+          </div>
+          <span>Ambient</span>
+        </button>
+
+        {/* Distraction Parking Lot */}
+        <button
+          onClick={() => setShowParkingLotDrawer(!showParkingLotDrawer)}
+          className="flex flex-col items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-purple-600 transition-colors"
+          title="Distraction Parking Lot (Quick capture stray thoughts)"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-white border border-purple-100 flex items-center justify-center shadow-xs">
+            <FileText className="w-5 h-5" />
+          </div>
+          <span>Parking Lot</span>
+        </button>
+
+        {/* Stats */}
+        <button
+          onClick={() => setCurrentTab('wellbeing')}
+          className="flex flex-col items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-purple-600 transition-colors"
+          title="View Progress & Stats"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-white border border-purple-100 flex items-center justify-center shadow-xs">
+            <BarChart2 className="w-5 h-5" />
+          </div>
+          <span>Stats</span>
+        </button>
+      </div>
+
+      {/* Embedded Parking Lot Drawer if opened */}
+      {showParkingLotDrawer && (
+        <div className="pt-2 animate-fadeIn">
+          <DistractionParkingLot />
+        </div>
+      )}
     </div>
   );
 };

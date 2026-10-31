@@ -3,14 +3,12 @@ import {
   Settings as SettingsIcon, 
   HardDrive, 
   ShieldCheck, 
-  Cloud, 
-  CloudOff, 
   Download, 
   Upload, 
   Trash2, 
   CheckCircle2, 
-  RefreshCw, 
-  Lock 
+  Lock,
+  Sparkles 
 } from 'lucide-react';
 import { useMindSpace } from '../../store/MindSpaceContext';
 
@@ -51,48 +49,47 @@ export const SettingsView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-5 animate-fadeIn">
       <div>
-        <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-          <SettingsIcon className="w-5 h-5 text-slate-400" />
-          <span>Privacy, Permissions & Local-First Sync</span>
+        <h2 className="text-xl sm:text-2xl font-black text-slate-800 font-['Quicksand',sans-serif] flex items-center gap-2">
+          <SettingsIcon className="w-6 h-6 text-purple-600" />
+          <span>Settings & Local-First Privacy 🌸</span>
         </h2>
-        <p className="text-xs text-slate-400">
-          Your attention data belongs to you. Stored locally on this device by default.
+        <p className="text-xs text-purple-600/80 font-medium">
+          Your study habits and data belong to you. Stored locally on this device by default.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Section 1: Local-First & Synchronization */}
-        <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-          <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-            <HardDrive className="w-4 h-4 text-emerald-400" />
-            <span>Local-First Data Storage</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Section 1: Device Pairing & Local-First */}
+        <div className="p-6 rounded-[30px] bg-white border border-purple-100 shadow-[0_8px_30px_rgba(139,92,246,0.04)] space-y-4">
+          <h3 className="text-sm font-black text-slate-800 flex items-center gap-2">
+            <HardDrive className="w-4 h-4 text-purple-600" />
+            <span>Local-First Sync Protocol</span>
           </h3>
 
-          <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2 text-xs">
+          <div className="p-3.5 rounded-2xl bg-[#FAF7FD] border border-purple-100 space-y-2 text-xs">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-slate-200">Device Pairing Code</span>
-              <span className="font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+              <span className="font-bold text-slate-700">Device Pairing Code</span>
+              <span className="font-mono text-purple-700 font-black bg-white px-2.5 py-0.5 rounded-lg border border-purple-200">
                 {settings.deviceSyncId}
               </span>
             </div>
-            <p className="text-slate-400 text-[11px] leading-relaxed">
-              Use this code to pair your mobile phone with this desktop without intermediate cloud servers.
+            <p className="text-slate-500 text-[11px] font-medium leading-relaxed">
+              Pair your phone with your desktop for seamless cross-device synchronization without cloud intermediaries.
             </p>
           </div>
 
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3 pt-1">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-semibold text-slate-200">Optional Cloud Sync</div>
-                <div className="text-[11px] text-slate-400">End-to-end encrypted backup to private cloud</div>
+                <div className="text-xs font-bold text-slate-800">Optional Encrypted Cloud Sync</div>
+                <div className="text-[11px] text-slate-500 font-medium">End-to-end encrypted backup</div>
               </div>
               <button
                 onClick={() => updateSettings({ cloudSyncEnabled: !settings.cloudSyncEnabled })}
                 className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
-                  settings.cloudSyncEnabled ? 'bg-emerald-600' : 'bg-slate-700'
+                  settings.cloudSyncEnabled ? 'bg-purple-600' : 'bg-slate-200'
                 }`}
               >
                 <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
@@ -103,13 +100,13 @@ export const SettingsView: React.FC = () => {
 
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-semibold text-slate-200">Local-Only Isolation Mode</div>
-                <div className="text-[11px] text-slate-400">Completely disables any external network requests</div>
+                <div className="text-xs font-bold text-slate-800">Local-Only Isolation Mode</div>
+                <div className="text-[11px] text-slate-500 font-medium">Zero external internet requests</div>
               </div>
               <button
                 onClick={() => updateSettings({ localOnlyMode: !settings.localOnlyMode })}
                 className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
-                  settings.localOnlyMode ? 'bg-emerald-600' : 'bg-slate-700'
+                  settings.localOnlyMode ? 'bg-purple-600' : 'bg-slate-200'
                 }`}
               >
                 <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
@@ -120,23 +117,23 @@ export const SettingsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Section 2: Privacy & Tracking Permissions */}
-        <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-          <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-teal-400" />
-            <span>Privacy & Monitoring Controls</span>
+        {/* Section 2: Monitoring & Anti-Scroll Controls */}
+        <div className="p-6 rounded-[30px] bg-white border border-purple-100 shadow-[0_8px_30px_rgba(139,92,246,0.04)] space-y-4">
+          <h3 className="text-sm font-black text-slate-800 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-pink-500" />
+            <span>Anti-Scrolling & Chime Controls</span>
           </h3>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-semibold text-slate-200">Intentional Pause Interceptor</div>
-                <div className="text-[11px] text-slate-400">Intervene before opening selected feeds</div>
+                <div className="text-xs font-bold text-slate-800">Intentional Pause Interceptor</div>
+                <div className="text-[11px] text-slate-500 font-medium">Breathing pause before social media</div>
               </div>
               <button
                 onClick={() => updateSettings({ enableIntentionalPause: !settings.enableIntentionalPause })}
                 className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
-                  settings.enableIntentionalPause ? 'bg-emerald-600' : 'bg-slate-700'
+                  settings.enableIntentionalPause ? 'bg-purple-600' : 'bg-slate-200'
                 }`}
               >
                 <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
@@ -147,13 +144,13 @@ export const SettingsView: React.FC = () => {
 
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-semibold text-slate-200">Strict Lockout Enforcement</div>
-                <div className="text-[11px] text-slate-400">Enforce hard cooldown when limit is exceeded</div>
+                <div className="text-xs font-bold text-slate-800">Strict Lockout Enforcement</div>
+                <div className="text-[11px] text-slate-500 font-medium">Hard cooldown when daily limit is hit</div>
               </div>
               <button
                 onClick={() => updateSettings({ enableStrictBlocking: !settings.enableStrictBlocking })}
                 className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
-                  settings.enableStrictBlocking ? 'bg-emerald-600' : 'bg-slate-700'
+                  settings.enableStrictBlocking ? 'bg-purple-600' : 'bg-slate-200'
                 }`}
               >
                 <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
@@ -164,13 +161,13 @@ export const SettingsView: React.FC = () => {
 
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-semibold text-slate-200">Mindfulness Sound Chimes</div>
-                <div className="text-[11px] text-slate-400">Tibetan singing bowl audio feedback on completion</div>
+                <div className="text-xs font-bold text-slate-800">Tibetan Bowl & Mindfulness Chimes</div>
+                <div className="text-[11px] text-slate-500 font-medium">Acoustic chime on session completion</div>
               </div>
               <button
                 onClick={() => updateSettings({ enableSoundEffects: !settings.enableSoundEffects })}
                 className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
-                  settings.enableSoundEffects ? 'bg-emerald-600' : 'bg-slate-700'
+                  settings.enableSoundEffects ? 'bg-purple-600' : 'bg-slate-200'
                 }`}
               >
                 <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
@@ -178,85 +175,64 @@ export const SettingsView: React.FC = () => {
                 }`} />
               </button>
             </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-semibold text-slate-200">Telemetry & Analytics</div>
-                <div className="text-[11px] text-slate-400">Disabled by default (Zero third-party trackers)</div>
-              </div>
-              <button
-                onClick={() => updateSettings({ telemetryEnabled: !settings.telemetryEnabled })}
-                className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
-                  settings.telemetryEnabled ? 'bg-emerald-600' : 'bg-slate-700'
-                }`}
-              >
-                <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
-                  settings.telemetryEnabled ? 'translate-x-5' : 'translate-x-0'
-                }`} />
-              </button>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Section 3: Backup & Restore */}
-      <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-        <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-          <Download className="w-4 h-4 text-indigo-400" />
+      {/* Backup & Portability */}
+      <div className="p-6 rounded-[30px] bg-white border border-purple-100 shadow-[0_8px_30px_rgba(139,92,246,0.04)] space-y-4">
+        <h3 className="text-sm font-black text-slate-800 flex items-center gap-2">
+          <Download className="w-4 h-4 text-purple-600" />
           <span>Local Data Portability (Export & Restore)</span>
         </h3>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <button
             onClick={handleDownloadBackup}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs shadow-md shadow-purple-200 transition-colors"
           >
             <Download className="w-4 h-4" />
-            <span>Download Full JSON Backup</span>
+            <span>Download JSON Backup</span>
           </button>
-
-          <div className="text-xs text-slate-400">
-            Export all tasks, categories, distraction history, limits, and reflections in open JSON format.
-          </div>
+          <span className="text-xs text-slate-500 font-medium">
+            Export all subjects, tasks, distraction logs, and reflections anytime.
+          </span>
         </div>
 
-        {/* Paste JSON to restore */}
-        <div className="space-y-2 pt-2">
-          <label className="text-xs font-semibold text-slate-400 block">
-            Or Paste Backup JSON to Restore:
+        <div className="space-y-2 pt-1">
+          <label className="text-xs font-bold text-slate-600 block">
+            Paste JSON Backup to Restore:
           </label>
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="Paste exported JSON here..."
+              placeholder="Paste JSON here..."
               value={importJsonText}
               onChange={e => setImportJsonText(e.target.value)}
-              className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+              className="flex-1 bg-[#FAF7FD] border border-purple-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-600 font-medium"
             />
             <button
               onClick={handleImport}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200"
+              className="px-4 py-2 rounded-2xl bg-white border border-purple-200 text-xs font-bold text-purple-700 hover:bg-purple-50"
             >
               Restore
             </button>
           </div>
-          {importStatus && (
-            <p className="text-xs text-emerald-400">{importStatus}</p>
-          )}
+          {importStatus && <p className="text-xs text-emerald-600 font-bold">{importStatus}</p>}
         </div>
 
-        {/* Danger Zone: Reset */}
-        <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+        {/* Reset */}
+        <div className="pt-3 border-t border-purple-50 flex items-center justify-between">
           <div>
-            <div className="text-xs font-semibold text-rose-300">Reset Local Database</div>
-            <div className="text-[11px] text-slate-400">Clears local storage and reloads default state</div>
+            <div className="text-xs font-bold text-rose-600">Reset Local Database</div>
+            <div className="text-[11px] text-slate-400 font-medium">Reverts to initial study demo data</div>
           </div>
 
           {showConfirmReset ? (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowConfirmReset(false)}
-                className="px-3 py-1.5 rounded-xl text-xs text-slate-400"
+                className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500"
               >
                 Cancel
               </button>
@@ -273,7 +249,7 @@ export const SettingsView: React.FC = () => {
           ) : (
             <button
               onClick={() => setShowConfirmReset(true)}
-              className="px-3 py-1.5 rounded-xl border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-medium"
+              className="px-3 py-1.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold"
             >
               Reset Data
             </button>

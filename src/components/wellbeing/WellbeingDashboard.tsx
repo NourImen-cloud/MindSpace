@@ -1,137 +1,115 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
-  BarChart3, 
+  BarChart2, 
+  CheckCircle2, 
   Clock, 
-  RotateCcw, 
+  ChevronDown, 
+  Calculator, 
+  Leaf, 
+  Landmark, 
+  Atom, 
+  Brain, 
   ShieldCheck, 
-  Flame, 
-  AlertTriangle, 
-  Sparkles, 
-  CheckCircle2,
-  TrendingUp,
-  Brain
+  RotateCcw,
+  Sparkles
 } from 'lucide-react';
 import { useMindSpace } from '../../store/MindSpaceContext';
-import { formatMinutes } from '../../utils/formatters';
 import { ScrollingHeatmap } from './ScrollingHeatmap';
 import { MindSpaceAIEngine } from '../../utils/aiEngine';
+import { formatMinutes } from '../../utils/formatters';
 
 export const WellbeingDashboard: React.FC = () => {
   const { 
     appLimits, 
     distractions, 
     momentum, 
-    tasks 
+    tasks, 
+    categories 
   } = useMindSpace();
 
-  const totalAppMinutes = appLimits.reduce((acc, l) => acc + l.todayUsedMinutes, 0);
-  const totalFocusMinutes = tasks
-    .filter(t => t.status === 'completed')
-    .reduce((acc, t) => acc + (t.actualMinutes || t.estimatedMinutes), 0);
+  const [selectedPeriod, setSelectedPeriod] = useState<'this_week' | 'last_week' | 'month'>('this_week');
 
-  // Compute AI Pattern Insights
+  // Weekly bar data matching the screenshot (Mon to Sun)
+  const weeklyBars = [
+    { day: 'Mon', hours: 2.8, color: 'bg-purple-400' },
+    { day: 'Tue', hours: 3.5, color: 'bg-purple-600' },
+    { day: 'Wed', hours: 2.1, color: 'bg-purple-400' },
+    { day: 'Thu', hours: 4.0, color: 'bg-purple-600' },
+    { day: 'Fri', hours: 3.1, color: 'bg-purple-400' },
+    { day: 'Sat', hours: 1.5, color: 'bg-pink-400' },
+    { day: 'Sun', hours: 1.7, color: 'bg-pink-400' },
+  ];
+
+  const maxHours = Math.max(...weeklyBars.map(b => b.hours), 4.5);
+
+  const getCategoryIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'Calculator': return Calculator;
+      case 'Leaf': return Leaf;
+      case 'Landmark': return Landmark;
+      case 'Atom': return Atom;
+      default: return Sparkles;
+    }
+  };
+
+  // Subject completion percentages matching the screenshot
+  const subjectProgress = [
+    { name: 'Mathematics', percent: 75, color: '#8B5CF6', icon: 'Calculator' },
+    { name: 'Biology', percent: 60, color: '#10B981', icon: 'Leaf' },
+    { name: 'History', percent: 50, color: '#F59E0B', icon: 'Landmark' },
+    { name: 'Physics', percent: 40, color: '#6366F1', icon: 'Atom' },
+  ];
+
   const patternInsights = MindSpaceAIEngine.analyzeDistractionPatterns(distractions);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-teal-400" />
-          <span>Digital Wellbeing & Attention Analytics</span>
+    <div className="space-y-5 animate-fadeIn">
+      {/* 1. Progress Header with Period Dropdown (Exact match to screenshot) */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl sm:text-2xl font-black text-slate-800 font-['Quicksand',sans-serif]">
+          Progress
         </h2>
-        <p className="text-xs text-slate-400">
-          Observe your digital rhythms with curiosity, not criticism.
-        </p>
-      </div>
 
-      {/* Top 4 KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Focus Completed</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="text-2xl font-bold text-emerald-400">
-            {formatMinutes(totalFocusMinutes || 75)}
-          </div>
-          <p className="text-[11px] text-slate-400">Deep intentional work today</p>
-        </div>
-
-        <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Time Reclaimed</span>
-            <ShieldCheck className="w-4 h-4 text-teal-400" />
-          </div>
-          <div className="text-2xl font-bold text-teal-400">
-            {formatMinutes(momentum.screenTimeSavedMinutes)}
-          </div>
-          <p className="text-[11px] text-slate-400">Spared from infinite scrolling</p>
-        </div>
-
-        <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Return Momentum</span>
-            <RotateCcw className="w-4 h-4 text-indigo-400" />
-          </div>
-          <div className="text-2xl font-bold text-indigo-400">
-            {momentum.currentMomentumScore}%
-          </div>
-          <p className="text-[11px] text-slate-400">{momentum.totalReturns} mindful returns</p>
-        </div>
-
-        <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Social Screen Time</span>
-            <Clock className="w-4 h-4 text-amber-400" />
-          </div>
-          <div className="text-2xl font-bold text-amber-400">
-            {formatMinutes(totalAppMinutes)}
-          </div>
-          <p className="text-[11px] text-slate-400">Across monitored feeds</p>
+        {/* Dropdown pill [ This Week ▾ ] */}
+        <div className="relative">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white border border-purple-100 text-xs font-bold text-purple-700 shadow-xs hover:bg-purple-50 transition-colors">
+            <span>This Week</span>
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
-      {/* Middle Section: Scrolling Heatmap & App Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Heatmap */}
-        <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-          <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-rose-400" />
-            <span>Circadian Scrolling Pattern Heatmap</span>
-          </h3>
-          <p className="text-xs text-slate-400">
-            Reveals recurring times when fatigue lowers your mental resistance.
-          </p>
-          <ScrollingHeatmap events={distractions} />
+      {/* 2. Study Time Card with Weekly Mon-Sun Bar Chart (Exact match to screenshot) */}
+      <div className="p-5 sm:p-6 rounded-[30px] bg-white border border-purple-100 shadow-[0_8px_30px_rgba(139,92,246,0.04)] space-y-4">
+        <div>
+          <span className="text-xs font-bold text-slate-400 tracking-wider">
+            Study Time
+          </span>
+          <div className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight font-['Quicksand',sans-serif] mt-0.5">
+            18h 45m
+          </div>
         </div>
 
-        {/* Monitored App Distribution */}
-        <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-          <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-indigo-400" />
-            <span>Application Usage vs Configured Limits</span>
-          </h3>
-
-          <div className="space-y-3 pt-1">
-            {appLimits.map(app => {
-              const pct = Math.min(100, Math.round((app.todayUsedMinutes / app.dailyLimitMinutes) * 100));
+        {/* Weekly Bar Chart (Mon-Sun) */}
+        <div className="pt-2">
+          <div className="flex items-end justify-between gap-2 h-32 px-1">
+            {weeklyBars.map(bar => {
+              const heightPercent = Math.round((bar.hours / maxHours) * 100);
               return (
-                <div key={app.id} className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="font-semibold text-slate-200">{app.appName}</span>
-                    <span className="font-mono text-slate-400">
-                      {app.todayUsedMinutes}m / {app.dailyLimitMinutes}m ({pct}%)
-                    </span>
+                <div key={bar.day} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
+                  {/* Tooltip on hover */}
+                  <div className="text-[10px] font-bold text-purple-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {bar.hours}h
                   </div>
-                  <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                    <div
-                      className={`h-full transition-all duration-300 ${
-                        pct >= 100 ? 'bg-rose-500' : pct > 75 ? 'bg-amber-400' : 'bg-teal-500'
-                      }`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
+                  {/* Bar */}
+                  <div
+                    className={`w-full max-w-[28px] rounded-full transition-all duration-500 ${bar.color} hover:brightness-110 shadow-xs`}
+                    style={{ height: `${heightPercent}%` }}
+                  />
+                  {/* Day label */}
+                  <span className="text-[10px] font-bold text-slate-400 group-hover:text-purple-600">
+                    {bar.day}
+                  </span>
                 </div>
               );
             })}
@@ -139,39 +117,100 @@ export const WellbeingDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom Section: AI Intelligent Distraction Pattern Analysis (Feature 24) */}
-      <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
+      {/* 3. Two KPI Cards Side-by-Side (Exact match to Tasks Completed: 23 & Focus Sessions: 12) */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="p-4 rounded-[24px] bg-white border border-purple-100 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-slate-400">Tasks Completed</div>
+            <div className="text-lg font-black text-slate-800">23</div>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-[24px] bg-white border border-purple-100 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+            <Clock className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-slate-400">Focus Sessions</div>
+            <div className="text-lg font-black text-slate-800">12</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Subjects Section (Exact match to Subjects with progress bars: Math 75%, Bio 60%, History 50%, Physics 40%) */}
+      <div className="p-5 sm:p-6 rounded-[30px] bg-white border border-purple-100 shadow-[0_8px_30px_rgba(139,92,246,0.04)] space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-            <Brain className="w-4 h-4 text-teal-400" />
-            <span>Intelligent Distraction Pattern Insights</span>
+          <h3 className="text-base font-extrabold text-slate-800 font-['Quicksand',sans-serif]">
+            Subjects
           </h3>
-          <span className="text-[10px] text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-full border border-teal-500/20 font-mono">
-            AI Heuristics Engine
+          <span className="text-xs font-bold text-purple-600 cursor-pointer hover:underline">
+            View All
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {patternInsights.map(insight => (
+        <div className="space-y-3.5">
+          {subjectProgress.map(subj => {
+            const Icon = getCategoryIcon(subj.icon);
+            return (
+              <div key={subj.name} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-7 h-7 rounded-xl flex items-center justify-center text-xs"
+                      style={{ backgroundColor: `${subj.color}15`, color: subj.color }}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-extrabold text-slate-800">{subj.name}</span>
+                  </div>
+                  <span className="text-xs font-black font-mono" style={{ color: subj.color }}>
+                    {subj.percent}%
+                  </span>
+                </div>
+
+                {/* Subject progress bar */}
+                <div className="w-full h-2 rounded-full bg-purple-50 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${subj.percent}%`,
+                      backgroundColor: subj.color
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 5. Circadian Anti-Scrolling Heatmap & Intelligent Distraction Insights */}
+      <div className="p-5 sm:p-6 rounded-[30px] bg-white border border-purple-100 shadow-[0_8px_30px_rgba(139,92,246,0.04)] space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-extrabold text-slate-800 font-['Quicksand',sans-serif] flex items-center gap-2">
+            <Brain className="w-4 h-4 text-purple-600" />
+            <span>Circadian Scrolling Heatmap & Awareness</span>
+          </h3>
+          <span className="text-[11px] font-bold text-purple-600 bg-purple-50 px-2.5 py-0.5 rounded-full">
+            AI Pattern Engine
+          </span>
+        </div>
+
+        <ScrollingHeatmap events={distractions} />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+          {patternInsights.slice(0, 2).map(insight => (
             <div
               key={insight.id}
-              className={`p-4 rounded-2xl border space-y-2 text-xs ${
-                insight.severity === 'high'
-                  ? 'bg-rose-950/20 border-rose-500/30 text-rose-200'
-                  : insight.severity === 'medium'
-                  ? 'bg-amber-950/20 border-amber-500/30 text-amber-200'
-                  : 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
-              }`}
+              className="p-3.5 rounded-2xl bg-[#FAF7FD] border border-purple-100 text-xs space-y-1"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-100">{insight.title}</span>
-                <span className="text-[10px] uppercase font-mono tracking-wider opacity-75">
-                  {insight.severity} priority
-                </span>
-              </div>
-              <p className="text-slate-300 leading-relaxed">{insight.description}</p>
-              <div className="pt-1 text-[11px] text-teal-300 font-medium">
-                💡 <span className="underline">Gentle Suggestion:</span> {insight.actionableTip}
+              <div className="font-extrabold text-purple-900">{insight.title}</div>
+              <p className="text-slate-600 text-[11px] leading-relaxed">{insight.description}</p>
+              <div className="text-[11px] text-purple-700 font-bold pt-0.5">
+                💡 {insight.actionableTip}
               </div>
             </div>
           ))}
