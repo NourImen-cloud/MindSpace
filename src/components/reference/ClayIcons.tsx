@@ -238,22 +238,26 @@ export const BunnyProfileIcon: React.FC<{ className?: string }> = ({ className =
   </svg>
 );
 
-// 10. 3D Project Folders in 4 Colors
-export const ClayFolder: React.FC<{ color: 'purple' | 'pink' | 'green' | 'yellow'; className?: string }> = ({
-  color,
+// 10. 3D Project Folders in All Colors (Supports purple, pink, green, yellow, blue, rose)
+export const ClayFolder: React.FC<{ color?: string; className?: string }> = ({
+  color = 'purple',
   className = "w-6 h-6"
 }) => {
-  const colorMap = {
+  const colorMap: Record<string, { tab: string; front: string; body: string }> = {
     purple: { tab: '#A78BFA', front: '#C4B5FD', body: '#8B5CF6' },
     pink: { tab: '#FB7185', front: '#FDA4AF', body: '#F43F5E' },
     green: { tab: '#4ADE80', front: '#86EFAC', body: '#22C55E' },
     yellow: { tab: '#FACC15', front: '#FDE047', body: '#EAB308' },
-  }[color];
+    blue: { tab: '#38BDF8', front: '#7DD3FC', body: '#0284C7' },
+    rose: { tab: '#FB7185', front: '#FDA4AF', body: '#E11D48' },
+  };
+
+  const activeColor = colorMap[color] || colorMap.purple;
 
   return (
     <svg viewBox="0 0 32 32" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 8C4 6.9 4.9 6 6 6H12L15 9H26C27.1 9 28 9.9 28 11V24C28 25.1 27.1 26 26 26H6C4.9 26 4 25.1 4 24V8Z" fill={colorMap.body} />
-      <path d="M4 13C4 11.9 4.9 11 6 11H26C27.1 11 28 11.9 28 13V24C28 25.1 27.1 26 26 26H6C4.9 26 4 25.1 4 24V13Z" fill={colorMap.front} />
+      <path d="M4 8C4 6.9 4.9 6 6 6H12L15 9H26C27.1 9 28 9.9 28 11V24C28 25.1 27.1 26 26 26H6C4.9 26 4 25.1 4 24V8Z" fill={activeColor.body} />
+      <path d="M4 13C4 11.9 4.9 11 6 11H26C27.1 11 28 11.9 28 13V24C28 25.1 27.1 26 26 26H6C4.9 26 4 25.1 4 24V13Z" fill={activeColor.front} />
     </svg>
   );
 };

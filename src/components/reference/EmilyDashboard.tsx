@@ -875,7 +875,7 @@ export const EmilyDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-4 max-h-[380px] overflow-y-auto pr-1">
                     {projects.map(proj => (
                       <div 
                         key={proj.id} 
