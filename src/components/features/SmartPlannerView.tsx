@@ -15,11 +15,13 @@ import {
   Heart,
   CheckCircle2,
   Circle,
-  Trash2
+  Trash2,
+  Edit2
 } from 'lucide-react';
 import { useMindSpace } from '../../store/MindSpaceContext';
 import { MindSpaceAIEngine, SmartScheduleResult } from '../../utils/aiEngine';
 import { formatTimeSlot } from '../../utils/formatters';
+import { Task, Priority } from '../../types';
 
 export const SmartPlannerView: React.FC = () => {
   const { tasks, updateTask, deleteTask, categories, startFocusSession, addTask } = useMindSpace();
@@ -37,6 +39,36 @@ export const SmartPlannerView: React.FC = () => {
   const [newCategory, setNewCategory] = useState('cat-university');
   const [newMinutes, setNewMinutes] = useState(35);
   const [newPriority, setNewPriority] = useState<'P1' | 'P2' | 'P3' | 'P4'>('P2');
+
+  // Edit task form state
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editCategory, setEditCategory] = useState('cat-university');
+  const [editMinutes, setEditMinutes] = useState(30);
+  const [editPriority, setEditPriority] = useState<Priority>('P2');
+  const [editScheduledTime, setEditScheduledTime] = useState('');
+
+  const handleOpenEdit = (task: Task) => {
+    setEditingTask(task);
+    setEditTitle(task.title);
+    setEditCategory(task.categoryId);
+    setEditMinutes(task.estimatedMinutes);
+    setEditPriority(task.priority);
+    setEditScheduledTime(task.scheduledTime || '');
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTask || !editTitle.trim()) return;
+    updateTask(editingTask.id, {
+      title: editTitle.trim(),
+      categoryId: editCategory,
+      estimatedMinutes: editMinutes,
+      priority: editPriority,
+      scheduledTime: editScheduledTime.trim() || undefined
+    });
+    setEditingTask(null);
+  };
 
   const weekDays = React.useMemo(() => {
     const now = new Date();
@@ -298,6 +330,13 @@ export const SmartPlannerView: React.FC = () => {
                   </button>
                 )}
                 <button
+                  onClick={() => handleOpenEdit(task)}
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
+                  title="Edit Task"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
                   onClick={() => deleteTask(task.id)}
                   className="p-1.5 rounded-xl text-slate-300 hover:text-rose-500 transition-colors"
                 >
@@ -384,6 +423,99 @@ export const SmartPlannerView: React.FC = () => {
                   className="px-5 py-2 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs shadow-md shadow-purple-200"
                 >
                   Save Task
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Task Modal */}
+      {editingTask && (
+        <div className="fixed inset-0 bg-purple-950/30 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white border border-purple-100 rounded-[32px] w-full max-w-md p-6 space-y-4 shadow-2xl">
+            <h3 className="text-lg font-black text-slate-800 font-['Quicksand',sans-serif]">
+              Edit Activity Task
+            </h3>
+            <form onSubmit={handleSaveEdit} className="space-y-3.5">
+              <div>
+                <label className="text-xs font-bold text-slate-600 block mb-1">Task Title *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Prepare Research Abstract"
+                  value={editTitle}
+                  onChange={e => setEditTitle(e.target.value)}
+                  className="w-full bg-[#FAF7FD] border border-purple-200 rounded-2xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-purple-600 font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-600 block mb-1">Activity Category</label>
+                <select
+                  value={editCategory}
+                  onChange={e => setEditCategory(e.target.value)}
+                  className="w-full bg-[#FAF7FD] border border-purple-200 rounded-2xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-600 font-bold"
+                >
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-600 block mb-1">Estimated Minutes</label>
+                  <input
+                    type="number"
+                    min={5}
+                    max={120}
+                    step={5}
+                    value={editMinutes}
+                    onChange={e => setEditMinutes(Number(e.target.value))}
+                    className="w-full bg-[#FAF7FD] border border-purple-200 rounded-2xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-600 font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-600 block mb-1">Priority</label>
+                  <select
+                    value={editPriority}
+                    onChange={e => setEditPriority(e.target.value as Priority)}
+                    className="w-full bg-[#FAF7FD] border border-purple-200 rounded-2xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-600 font-bold"
+                  >
+                    <option value="P1">P1 Urgent</option>
+                    <option value="P2">P2 High</option>
+                    <option value="P3">P3 Medium</option>
+                    <option value="P4">P4 Low</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-600 block mb-1">Time Slot (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 09:30 AM"
+                  value={editScheduledTime}
+                  onChange={e => setEditScheduledTime(e.target.value)}
+                  className="w-full bg-[#FAF7FD] border border-purple-200 rounded-2xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-purple-600 font-bold"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingTask(null)}
+                  className="px-4 py-2 rounded-2xl text-xs font-bold text-slate-500 hover:text-slate-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs shadow-md shadow-purple-200"
+                >
+                  Save Changes
                 </button>
               </div>
             </form>
