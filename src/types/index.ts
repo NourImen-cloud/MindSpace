@@ -19,6 +19,7 @@ export interface Task {
   priority: Priority;
   estimatedMinutes: number;
   actualMinutes?: number;
+  scheduledDate?: string; // e.g. "YYYY-MM-DD"
   scheduledTime?: string; // e.g. "09:00 AM"
   scheduledDuration?: number; // minutes
   status: TaskStatus;

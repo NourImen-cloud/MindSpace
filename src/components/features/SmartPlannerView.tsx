@@ -23,7 +23,10 @@ import { formatTimeSlot } from '../../utils/formatters';
 
 export const SmartPlannerView: React.FC = () => {
   const { tasks, updateTask, deleteTask, categories, startFocusSession, addTask } = useMindSpace();
-  const [selectedDayIndex, setSelectedDayIndex] = useState(1);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(() => {
+    const today = new Date().getDay();
+    return today === 0 ? 6 : today - 1;
+  });
   const [aiResult, setAiResult] = useState<SmartScheduleResult | null>(null);
   const [isApplyingAi, setIsApplyingAi] = useState(false);
   const [selectedCatFilter, setSelectedCatFilter] = useState<string>('all');
@@ -35,15 +38,25 @@ export const SmartPlannerView: React.FC = () => {
   const [newMinutes, setNewMinutes] = useState(35);
   const [newPriority, setNewPriority] = useState<'P1' | 'P2' | 'P3' | 'P4'>('P2');
 
-  const weekDays = [
-    { day: 'Mon', date: 20 },
-    { day: 'Tue', date: 21 },
-    { day: 'Wed', date: 22 },
-    { day: 'Thu', date: 23 },
-    { day: 'Fri', date: 24 },
-    { day: 'Sat', date: 25 },
-    { day: 'Sun', date: 26 },
-  ];
+  const weekDays = React.useMemo(() => {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diff);
+
+    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return dayLabels.map((name, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      return {
+        day: name,
+        date: d.getDate(),
+        fullDate: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
+        isToday: d.toDateString() === now.toDateString()
+      };
+    });
+  }, []);
 
   const getCategoryIcon = (id: string) => {
     switch (id) {

@@ -62,9 +62,9 @@ export const EmilyDashboard: React.FC = () => {
 
   const [activeNav, setActiveNav] = useState<string>('dashboard');
 
-  // Interactive Calendar Selection
-  const [selectedDay, setSelectedDay] = useState<number>(15);
-  const [calendarMonth, setCalendarMonth] = useState('May 2024');
+  // Interactive Calendar Selection (Synced to Current Year & Real Date)
+  const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date>(() => new Date());
 
   // Interactive Chart Range Selector
   const [chartRange, setChartRange] = useState<'This Week' | 'Last Week' | 'This Month'>('This Week');
@@ -241,6 +241,44 @@ export const EmilyDashboard: React.FC = () => {
   const focusHours = Math.floor(focusMinutesTotal / 60);
   const focusMinutesRem = focusMinutesTotal % 60;
   const focusTimeDisplay = focusHours > 0 ? `${focusHours}h ${focusMinutesRem}m` : `${focusMinutesRem}m`;
+
+  // Dynamic Calendar Computations
+  const currentCalYear = calendarDate.getFullYear();
+  const currentCalMonth = calendarDate.getMonth();
+  const calendarMonthLabel = calendarDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+  const handlePrevMonth = () => {
+    setCalendarDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCalendarDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const daysInCurrentMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+  const firstDayRaw = new Date(currentCalYear, currentCalMonth, 1).getDay();
+  // Monday start: Mon = 0, Tue = 1 ... Sun = 6
+  const startDayOffset = (firstDayRaw + 6) % 7;
+  const daysInPrevMonth = new Date(currentCalYear, currentCalMonth, 0).getDate();
+
+  const prevMonthPaddingDays: number[] = [];
+  for (let i = startDayOffset - 1; i >= 0; i--) {
+    prevMonthPaddingDays.push(daysInPrevMonth - i);
+  }
+
+  const totalGridCells = Math.ceil((startDayOffset + daysInCurrentMonth) / 7) * 7;
+  const nextMonthPaddingCount = totalGridCells - (startDayOffset + daysInCurrentMonth);
+  const nextMonthPaddingDays: number[] = Array.from({ length: nextMonthPaddingCount }, (_, idx) => idx + 1);
+
+  const getTasksForDate = (dateObj: Date) => {
+    const key = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+    return tasks.filter(t => {
+      const taskDate = t.scheduledDate || (t.createdAt ? t.createdAt.slice(0, 10) : '');
+      return taskDate === key;
+    });
+  };
+
+  const selectedDateTasks = getTasksForDate(selectedCalendarDate);
 
   return (
     <div className="min-h-screen bg-[#F7F4EE] text-slate-800 p-3 sm:p-5 lg:p-7 font-['Nunito',sans-serif]">
@@ -709,21 +747,23 @@ export const EmilyDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Right: May 2024 Interactive Calendar Card (xl:col-span-4) */}
+                {/* Right: Interactive Calendar Card Synced to Real Current Year */}
                 <div className="xl:col-span-4 bg-white rounded-[28px] p-5 border border-[#ECE6D8] shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-3">
                   <div className="flex items-center justify-between text-slate-800">
                     <button 
-                      onClick={() => setCalendarMonth('April 2024')}
+                      onClick={handlePrevMonth}
                       className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                      title="Previous Month"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
                     <div className="text-xs font-black text-slate-900 font-['Quicksand',sans-serif]">
-                      {calendarMonth}
+                      {calendarMonthLabel}
                     </div>
                     <button 
-                      onClick={() => setCalendarMonth('June 2024')}
+                      onClick={handleNextMonth}
                       className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                      title="Next Month"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -740,21 +780,34 @@ export const EmilyDashboard: React.FC = () => {
                   </div>
 
                   <div className="grid grid-cols-7 gap-y-1 text-center text-xs font-bold">
-                    <span className="text-slate-300 py-1">29</span>
-                    <span className="text-slate-300 py-1">30</span>
-                    {[...Array(31)].map((_, i) => {
+                    {/* Padding days from previous month */}
+                    {prevMonthPaddingDays.map((d, idx) => (
+                      <span key={`prev-${idx}`} className="text-slate-300 py-1">
+                        {d}
+                      </span>
+                    ))}
+
+                    {/* Days in current month */}
+                    {Array.from({ length: daysInCurrentMonth }, (_, i) => {
                       const dayNum = i + 1;
-                      const isSelected = selectedDay === dayNum;
-                      const isWeekend = (dayNum + 2) % 7 === 0 || (dayNum + 1) % 7 === 0;
+                      const dateObj = new Date(currentCalYear, currentCalMonth, dayNum);
+                      const isSelected = selectedCalendarDate.getFullYear() === currentCalYear &&
+                        selectedCalendarDate.getMonth() === currentCalMonth &&
+                        selectedCalendarDate.getDate() === dayNum;
+                      
+                      const dayOfWeek = (startDayOffset + i) % 7;
+                      const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
+                      const dayTasks = getTasksForDate(dateObj);
+                      const hasTasks = dayTasks.length > 0;
 
                       return (
                         <span 
                           key={dayNum} 
                           onClick={() => {
-                            setSelectedDay(dayNum);
+                            setSelectedCalendarDate(dateObj);
                             setIsScheduleModalOpen(true);
                           }}
-                          className="py-1 cursor-pointer"
+                          className="py-1 cursor-pointer relative group flex flex-col items-center justify-center"
                         >
                           {isSelected ? (
                             <span className="w-6 h-6 rounded-full bg-[#8B5CF6] text-white font-black inline-flex items-center justify-center shadow-xs">
@@ -767,15 +820,26 @@ export const EmilyDashboard: React.FC = () => {
                               {dayNum}
                             </span>
                           )}
+                          {/* Dot indicator if tasks are scheduled on this day */}
+                          {hasTasks && (
+                            <span className={`w-1 h-1 rounded-full mt-0.5 ${isSelected ? 'bg-purple-300' : 'bg-purple-600'}`} />
+                          )}
                         </span>
                       );
                     })}
-                    <span className="text-slate-300 py-1">1</span>
-                    <span className="text-slate-300 py-1">2</span>
+
+                    {/* Padding days for next month */}
+                    {nextMonthPaddingDays.map((d, idx) => (
+                      <span key={`next-${idx}`} className="text-slate-300 py-1">
+                        {d}
+                      </span>
+                    ))}
                   </div>
 
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                    <span className="font-extrabold text-slate-500">Selected Day: May {selectedDay}</span>
+                    <span className="font-extrabold text-slate-500">
+                      Selected: {selectedCalendarDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
                     <button
                       onClick={() => setIsScheduleModalOpen(true)}
                       className="text-purple-600 font-black hover:text-purple-800"
@@ -1240,7 +1304,7 @@ export const EmilyDashboard: React.FC = () => {
               <div className="flex items-center gap-2">
                 <CalendarCheck className="w-5 h-5 text-purple-600" />
                 <h3 className="text-base font-black text-slate-900">
-                  {userProfile.name}'s Schedule for May {selectedDay}, 2024
+                  {userProfile.name}'s Schedule for {selectedCalendarDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                 </h3>
               </div>
               <button 
@@ -1253,12 +1317,23 @@ export const EmilyDashboard: React.FC = () => {
 
             {/* Daily Schedule Timeline List */}
             <div className="space-y-3">
-              {tasks.length === 0 ? (
-                <div className="text-center py-8 text-xs text-slate-500 font-bold">
-                  No scheduled tasks yet for today. Use the Smart Planner or + Top Tasks to add your focus plan!
+              {selectedDateTasks.length === 0 ? (
+                <div className="text-center py-8 space-y-2">
+                  <p className="text-xs text-slate-500 font-bold">
+                    No scheduled tasks found for {selectedCalendarDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setIsScheduleModalOpen(false);
+                      handleOpenAddTask();
+                    }}
+                    className="px-4 py-1.5 rounded-full bg-purple-100 text-purple-700 hover:bg-purple-200 text-xs font-black transition-colors"
+                  >
+                    + Add Task for Today
+                  </button>
                 </div>
               ) : (
-                tasks.map((task, i) => {
+                selectedDateTasks.map((task, i) => {
                   const hour = 9 + Math.floor(i * 1.5);
                   const timeFormatted = `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
                   return (
