@@ -337,6 +337,7 @@ export const INITIAL_MOMENTUM_STATS: ReturnMomentumStats = {
   totalReturns: 14,
   currentMomentumScore: 88,
   screenTimeSavedMinutes: 135,
+  totalFocusMinutes: 135,
   mindfulChoicesCount: 19,
   studyStreakDays: 12,
   lastReturnTimestamp: new Date().toISOString()

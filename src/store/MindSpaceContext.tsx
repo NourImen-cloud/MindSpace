@@ -108,6 +108,7 @@ interface MindSpaceContextType {
 
   // Digital Wellbeing & Momentum
   momentum: ReturnMomentumStats;
+  logFocusMinutes: (minutes: number) => void;
   reflections: WeeklyReflection[];
   addReflection: (reflection: Omit<WeeklyReflection, 'id' | 'createdAt'>) => void;
 
@@ -321,11 +322,15 @@ export const MindSpaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         console.warn('Confetti skipped:', e);
       }
 
-      // Award return momentum
+      const sessionMinutes = activeFocusSession.targetMinutes || 25;
+      // Award return momentum & increment real focus time
       setMomentum(prev => ({
         ...prev,
+        totalFocusMinutes: (prev.totalFocusMinutes || 0) + sessionMinutes,
+        screenTimeSavedMinutes: prev.screenTimeSavedMinutes + sessionMinutes,
         currentMomentumScore: Math.min(100, prev.currentMomentumScore + 5),
         mindfulChoicesCount: prev.mindfulChoicesCount + 1,
+        totalReturns: prev.totalReturns + 1,
       }));
     }
   };
@@ -411,10 +416,31 @@ export const MindSpaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         updateTask(activeFocusSession.taskId, { status: 'completed', completedAt: new Date().toISOString() });
       }
 
+      if (completed) {
+        setMomentum(prev => ({
+          ...prev,
+          totalFocusMinutes: (prev.totalFocusMinutes || 0) + elapsedMinutes,
+          screenTimeSavedMinutes: prev.screenTimeSavedMinutes + elapsedMinutes,
+          currentMomentumScore: Math.min(100, prev.currentMomentumScore + 3),
+          mindfulChoicesCount: prev.mindfulChoicesCount + 1,
+          totalReturns: prev.totalReturns + 1,
+        }));
+      }
+
       setLastCompletedSession(finished);
       setActiveFocusSession(null);
     }
     setIsFocusModalOpen(false);
+  };
+
+  const logFocusMinutes = (minutes: number) => {
+    if (minutes <= 0) return;
+    setMomentum(prev => ({
+      ...prev,
+      totalFocusMinutes: (prev.totalFocusMinutes || 0) + minutes,
+      screenTimeSavedMinutes: prev.screenTimeSavedMinutes + minutes,
+      currentMomentumScore: Math.min(100, prev.currentMomentumScore + 2),
+    }));
   };
 
   const addParkingLotItem = (text: string) => {
@@ -666,6 +692,7 @@ export const MindSpaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         cancelIntercept,
         alternatives,
         momentum,
+        logFocusMinutes,
         reflections,
         addReflection,
         currentAmbient,

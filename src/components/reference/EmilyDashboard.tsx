@@ -237,7 +237,7 @@ export const EmilyDashboard: React.FC = () => {
   const completedPercentage = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
   
   // Real focus minutes logged by this user
-  const focusMinutesTotal = momentum.screenTimeSavedMinutes || 0;
+  const focusMinutesTotal = (momentum.totalFocusMinutes ?? momentum.screenTimeSavedMinutes) || 0;
   const focusHours = Math.floor(focusMinutesTotal / 60);
   const focusMinutesRem = focusMinutesTotal % 60;
   const focusTimeDisplay = focusHours > 0 ? `${focusHours}h ${focusMinutesRem}m` : `${focusMinutesRem}m`;

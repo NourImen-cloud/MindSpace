@@ -154,6 +154,7 @@ export interface ReturnMomentumStats {
   totalReturns: number;
   currentMomentumScore: number;
   screenTimeSavedMinutes: number;
+  totalFocusMinutes?: number;
   mindfulChoicesCount: number;
   studyStreakDays: number;
   lastReturnTimestamp?: string;
