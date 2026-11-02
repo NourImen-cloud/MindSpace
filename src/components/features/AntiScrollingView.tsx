@@ -19,7 +19,9 @@ import {
   Flame,
   HelpCircle,
   ArrowRight,
-  Info
+  Info,
+  AlertTriangle,
+  RotateCcw
 } from 'lucide-react';
 import { useMindSpace } from '../../store/MindSpaceContext';
 import { formatMinutes } from '../../utils/formatters';
@@ -32,6 +34,7 @@ export const AntiScrollingView: React.FC = () => {
     addAppLimit,
     updateAppLimit, 
     deleteAppLimit,
+    logAppUsage,
     triggerDistractionIntercept, 
     momentum 
   } = useMindSpace();
@@ -210,7 +213,7 @@ export const AntiScrollingView: React.FC = () => {
                       <div>
                         <div className="text-xs font-black text-slate-900">{limit.appName}</div>
                         <div className="text-[10px] text-slate-500 font-bold">
-                          Daily Allowance: <span className="text-purple-700 font-mono font-black">{limit.dailyLimitMinutes}m</span>
+                          Usage: <span className="text-purple-700 font-mono font-black">{limit.todayUsedMinutes}m used</span> / <span className="font-mono">{limit.dailyLimitMinutes}m allowed</span>
                         </div>
                       </div>
                     </div>
@@ -235,6 +238,53 @@ export const AntiScrollingView: React.FC = () => {
                         <span>Test Intercept</span>
                       </button>
                     </div>
+                  </div>
+
+                  {/* Usage Progress Bar */}
+                  <div className="space-y-1">
+                    <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          isOver ? 'bg-[#F43F5E]' : percentage > 75 ? 'bg-[#F59E0B]' : 'bg-[#8B5CF6]'
+                        }`}
+                        style={{ width: `${Math.min(100, percentage)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Limit Exceeded Alert Badge */}
+                  {isOver && (
+                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-rose-100 text-rose-800 text-xs font-black border border-rose-200 animate-pulse">
+                      <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                      <span>Time Limit Exceeded ({limit.todayUsedMinutes}m / {limit.dailyLimitMinutes}m)! Attention Shield Active</span>
+                    </div>
+                  )}
+
+                  {/* Simulation & Test Controls */}
+                  <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
+                    <span className="text-[10px] font-bold text-slate-400">Simulate:</span>
+                    <button
+                      onClick={() => logAppUsage(limit.id, 5)}
+                      className="px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 text-[10px] font-black border border-purple-200 transition-colors"
+                      title="Add 5 minutes of usage to test limit enforcement"
+                    >
+                      +5m Use
+                    </button>
+                    <button
+                      onClick={() => logAppUsage(limit.id, Math.max(1, limit.dailyLimitMinutes - limit.todayUsedMinutes + 1))}
+                      className="px-2 py-0.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 text-[10px] font-black border border-rose-200 transition-colors"
+                      title="Trigger shield immediately by exceeding allowed limit"
+                    >
+                      Exceed Limit ⚡
+                    </button>
+                    <button
+                      onClick={() => updateAppLimit(limit.id, { todayUsedMinutes: 0 })}
+                      className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-[10px] font-bold border border-slate-200 transition-colors flex items-center gap-0.5"
+                      title="Reset used time to 0m"
+                    >
+                      <RotateCcw className="w-2.5 h-2.5" />
+                      <span>Reset</span>
+                    </button>
                   </div>
 
                   {/* Mode Selector: Gentle Pause vs Strict Block */}

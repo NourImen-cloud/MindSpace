@@ -91,6 +91,7 @@ interface MindSpaceContextType {
   addAppLimit: (limit: Omit<AppLimit, 'id' | 'todayUsedMinutes'>) => void;
   updateAppLimit: (id: string, updates: Partial<AppLimit>) => void;
   deleteAppLimit: (id: string) => void;
+  logAppUsage: (id: string, additionalMinutes: number) => void;
   activeIntercept: {
     isOpen: boolean;
     appName: string;
@@ -569,7 +570,26 @@ export const MindSpaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const updateAppLimit = (id: string, updates: Partial<AppLimit>) => {
-    setAppLimits(prev => prev.map(limit => limit.id === id ? { ...limit, ...updates } : limit));
+    setAppLimits(prev => prev.map(limit => {
+      if (limit.id !== id) return limit;
+      const updated = { ...limit, ...updates };
+      if (updated.todayUsedMinutes >= updated.dailyLimitMinutes && settings.enableDistractionBlocking) {
+        setTimeout(() => triggerDistractionIntercept(updated.appName), 100);
+      }
+      return updated;
+    }));
+  };
+
+  const logAppUsage = (id: string, additionalMinutes: number) => {
+    setAppLimits(prev => prev.map(limit => {
+      if (limit.id !== id) return limit;
+      const newUsed = Math.max(0, limit.todayUsedMinutes + additionalMinutes);
+      const updated = { ...limit, todayUsedMinutes: newUsed };
+      if (newUsed >= limit.dailyLimitMinutes && settings.enableDistractionBlocking) {
+        setTimeout(() => triggerDistractionIntercept(limit.appName), 100);
+      }
+      return updated;
+    }));
   };
 
   const deleteAppLimit = (id: string) => {
@@ -684,6 +704,7 @@ export const MindSpaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         addAppLimit,
         updateAppLimit,
         deleteAppLimit,
+        logAppUsage,
         activeIntercept,
         triggerDistractionIntercept,
         setDistractionReason,
