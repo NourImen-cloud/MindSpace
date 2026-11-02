@@ -4,19 +4,17 @@ import {
   Settings as SettingsIcon, 
   Play, 
   Pause, 
-  Music, 
   FileText, 
   BarChart2, 
-  Sparkles,
-  Volume2,
-  VolumeX,
-  Sliders,
-  BookmarkPlus
+  CheckCircle2,
+  Check,
+  Target
 } from 'lucide-react';
 import { useMindSpace } from '../../store/MindSpaceContext';
 import { CozyStudyGirlIllustration } from '../common/AestheticAssets';
 import { formatSecondsToTimer } from '../../utils/formatters';
 import { DistractionParkingLot } from './DistractionParkingLot';
+import { Task } from '../../types';
 
 export const FocusModeView: React.FC = () => {
   const { 
@@ -28,9 +26,6 @@ export const FocusModeView: React.FC = () => {
     pauseFocusTimer, 
     resumeFocusTimer, 
     stopFocusSession,
-    currentAmbient, 
-    setAmbientSound, 
-    settings,
     setCurrentTab
   } = useMindSpace();
 
@@ -38,7 +33,13 @@ export const FocusModeView: React.FC = () => {
   const [selectedMinutes, setSelectedMinutes] = useState(25);
   const [showParkingLotDrawer, setShowParkingLotDrawer] = useState(false);
 
-  const activeTask = tasks.find(t => t.status === 'scheduled') || tasks[0];
+  // User Task Selection Control
+  const [selectedTaskId, setSelectedTaskId] = useState<string>(() => {
+    return tasks.find(t => t.status === 'scheduled')?.id || tasks[0]?.id || 'custom';
+  });
+  const [customGoal, setCustomGoal] = useState('');
+
+  const chosenTask = tasks.find(t => t.id === selectedTaskId);
 
   const handleTabChange = (mode: 'pomodoro' | 'short_break' | 'long_break') => {
     setActiveTabMode(mode);
@@ -51,7 +52,20 @@ export const FocusModeView: React.FC = () => {
 
   const handleStartOrToggle = () => {
     if (!isSessionActive) {
-      startFocusSession(activeTask, selectedMinutes);
+      if (selectedTaskId === 'custom' && customGoal.trim()) {
+        const dummyTask: Task = {
+          id: 'custom-' + Date.now(),
+          title: customGoal.trim(),
+          categoryId: 'cat-personal',
+          priority: 'P2',
+          estimatedMinutes: selectedMinutes,
+          status: 'scheduled',
+          createdAt: new Date().toISOString()
+        };
+        startFocusSession(dummyTask, selectedMinutes);
+      } else {
+        startFocusSession(chosenTask, selectedMinutes);
+      }
     } else {
       if (isTimerRunning) {
         pauseFocusTimer();
@@ -62,33 +76,35 @@ export const FocusModeView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-md mx-auto animate-fadeIn text-center">
-      {/* 1. Header with back and settings icon (Exact match to screenshot) */}
+    <div className="space-y-4 sm:space-y-6 max-w-lg mx-auto animate-fadeIn text-center px-2 sm:px-4">
+      {/* 1. Header with back and settings icon */}
       <div className="flex items-center justify-between">
         <button
           onClick={() => setCurrentTab('dashboard')}
           className="p-2 rounded-2xl bg-white border border-purple-100 text-slate-700 hover:text-purple-600 shadow-xs transition-colors"
+          title="Back to Dashboard"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
 
-        <h2 className="text-lg font-black text-slate-800 font-['Quicksand',sans-serif]">
+        <h2 className="text-base sm:text-lg font-black text-slate-800 font-['Quicksand',sans-serif]">
           Focus Timer
         </h2>
 
         <button
           onClick={() => setCurrentTab('settings')}
           className="p-2 rounded-2xl bg-white border border-purple-100 text-slate-700 hover:text-purple-600 shadow-xs transition-colors"
+          title="Timer Settings"
         >
           <SettingsIcon className="w-5 h-5" />
         </button>
       </div>
 
-      {/* 2. Mode Pill Tabs: [ Pomodoro ] [ Short Break ] (Exact match to screenshot) */}
-      <div className="flex items-center justify-center p-1.5 bg-white rounded-full border border-purple-100 shadow-xs max-w-xs mx-auto">
+      {/* 2. Mode Pill Tabs: [ Pomodoro (25m) ] [ Short Break (5m) ] [ Long Break (15m) ] */}
+      <div className="flex items-center justify-center p-1 bg-white rounded-full border border-purple-100 shadow-xs max-w-xs sm:max-w-sm mx-auto">
         <button
           onClick={() => handleTabChange('pomodoro')}
-          className={`flex-1 py-2 px-3 rounded-full text-xs font-extrabold transition-all ${
+          className={`flex-1 py-1.5 sm:py-2 px-2 sm:px-3 rounded-full text-xs font-extrabold transition-all ${
             activeTabMode === 'pomodoro'
               ? 'bg-purple-600 text-white shadow-sm'
               : 'text-purple-600/70 hover:text-purple-700'
@@ -98,7 +114,7 @@ export const FocusModeView: React.FC = () => {
         </button>
         <button
           onClick={() => handleTabChange('short_break')}
-          className={`flex-1 py-2 px-3 rounded-full text-xs font-extrabold transition-all ${
+          className={`flex-1 py-1.5 sm:py-2 px-2 sm:px-3 rounded-full text-xs font-extrabold transition-all ${
             activeTabMode === 'short_break'
               ? 'bg-purple-600 text-white shadow-sm'
               : 'text-purple-600/70 hover:text-purple-700'
@@ -106,45 +122,92 @@ export const FocusModeView: React.FC = () => {
         >
           Short Break
         </button>
+        <button
+          onClick={() => handleTabChange('long_break')}
+          className={`flex-1 py-1.5 sm:py-2 px-2 sm:px-3 rounded-full text-xs font-extrabold transition-all ${
+            activeTabMode === 'long_break'
+              ? 'bg-purple-600 text-white shadow-sm'
+              : 'text-purple-600/70 hover:text-purple-700'
+          }`}
+        >
+          Long Break
+        </button>
       </div>
 
-      {/* 3. Center Circular Anime Illustration (Exact match to screenshot cozy study anime girl in frame) */}
-      <div className="relative mx-auto w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center">
+      {/* 3. Task Selection Control (Gives User 100% Control on what to focus on) */}
+      {!isSessionActive ? (
+        <div className="bg-white rounded-2xl p-3 border border-purple-100 shadow-xs max-w-sm mx-auto text-left space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-black text-purple-700 uppercase tracking-wider flex items-center gap-1">
+              <Target className="w-3.5 h-3.5 text-purple-600" />
+              <span>Choose Focus Task:</span>
+            </span>
+            <span className="text-[10px] text-slate-400 font-bold">{tasks.length} tasks available</span>
+          </div>
+
+          <select
+            value={selectedTaskId}
+            onChange={e => setSelectedTaskId(e.target.value)}
+            className="w-full bg-[#FAF7FD] border border-purple-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-600"
+          >
+            {tasks.map(t => (
+              <option key={t.id} value={t.id}>
+                {t.title} ({t.estimatedMinutes}m) {t.status === 'completed' ? '✓' : ''}
+              </option>
+            ))}
+            <option value="custom">✨ Enter Custom Focus Goal...</option>
+          </select>
+
+          {selectedTaskId === 'custom' && (
+            <input
+              type="text"
+              placeholder="e.g. Study Chapter 4 Biology"
+              value={customGoal}
+              onChange={e => setCustomGoal(e.target.value)}
+              className="w-full bg-[#FAF7FD] border border-purple-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-600 animate-fadeIn"
+            />
+          )}
+        </div>
+      ) : (
+        <div className="bg-purple-50/70 border border-purple-200 rounded-2xl p-2.5 max-w-sm mx-auto text-center space-y-0.5">
+          <span className="text-[10px] font-black uppercase text-purple-600 tracking-wider">Active Anchor Task</span>
+          <p className="text-xs font-extrabold text-slate-800 truncate">
+            {activeFocusSession?.taskTitle || chosenTask?.title || 'Focused Session'}
+          </p>
+        </div>
+      )}
+
+      {/* 4. Responsive Circular Anime Illustration */}
+      <div className="relative mx-auto w-44 h-44 sm:w-56 sm:h-56 flex items-center justify-center">
         {/* Soft pastel ring with gentle glow */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-purple-200 via-pink-100 to-indigo-100 p-1 shadow-inner animate-breathe" />
 
         <div className="relative w-[92%] h-[92%] rounded-full bg-[#FAF7FD] border-2 border-white shadow-md overflow-hidden flex items-center justify-center">
-          <CozyStudyGirlIllustration className="w-48 h-48 sm:w-56 sm:h-56" />
+          <CozyStudyGirlIllustration className="w-36 h-36 sm:w-48 sm:h-48" />
         </div>
 
-        {/* Ambient floating elements */}
-        <span className="absolute bottom-6 left-4 text-xs animate-pulse">🌸</span>
+        {/* Ambient floating element */}
+        <span className="absolute bottom-4 left-3 text-xs animate-pulse">🌸</span>
       </div>
 
-      {/* 4. Bold Timer Display (Exact match to 25:00 in screenshot) */}
+      {/* 5. Bold Timer Display */}
       <div className="space-y-1">
-        <div className="font-extrabold text-5xl sm:text-6xl text-slate-800 tracking-tight font-['Quicksand',sans-serif]">
+        <div className="font-extrabold text-4xl sm:text-6xl text-slate-800 tracking-tight font-['Quicksand',sans-serif]">
           {isSessionActive 
             ? formatSecondsToTimer(focusSecondsRemaining)
             : `${selectedMinutes.toString().padStart(2, '0')}:00`
           }
         </div>
         <p className="text-xs font-semibold text-purple-600/90 flex items-center justify-center gap-1">
-          <span>Focus on your goal!</span>
+          <span>{isSessionActive && isTimerRunning ? 'Flowing in calm focus 🌸' : 'Ready to begin your session'}</span>
         </p>
-
-        {activeTask && (
-          <div className="text-[11px] text-slate-500 font-medium">
-            Anchor: <strong className="text-purple-700">{activeTask.title}</strong>
-          </div>
-        )}
       </div>
 
-      {/* 5. Big Purple Pill Start Button (Exact match to screenshot Start button) */}
-      <div className="pt-1 max-w-xs mx-auto">
+      {/* 6. Big Purple Pill Start / Pause Button */}
+      <div className="pt-1 max-w-xs mx-auto space-y-2">
         <button
           onClick={handleStartOrToggle}
-          className="w-full py-3.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm shadow-lg shadow-purple-300 transition-all active:scale-95 flex items-center justify-center gap-2"
+          className="w-full py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm shadow-lg shadow-purple-300 transition-all active:scale-95 flex items-center justify-center gap-2"
         >
           {isSessionActive && isTimerRunning ? (
             <>
@@ -154,7 +217,7 @@ export const FocusModeView: React.FC = () => {
           ) : (
             <>
               <Play className="w-4 h-4 fill-current" />
-              <span>{isSessionActive ? 'Resume' : 'Start'}</span>
+              <span>{isSessionActive ? 'Resume Flow' : 'Start Focus'}</span>
             </>
           )}
         </button>
@@ -162,32 +225,16 @@ export const FocusModeView: React.FC = () => {
         {isSessionActive && (
           <button
             onClick={() => stopFocusSession(true)}
-            className="mt-2 text-xs font-bold text-purple-600 hover:text-purple-800"
+            className="w-full py-2 text-xs font-bold text-purple-700 hover:text-purple-900 bg-purple-100 hover:bg-purple-200 rounded-full transition-colors flex items-center justify-center gap-1.5"
           >
-            Complete Session Early
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Complete Session & Log Time</span>
           </button>
         )}
       </div>
 
-      {/* 6. Bottom 3 Control Icons (Exact match to screenshot: Ambient, Tasks, Stats) */}
+      {/* 7. Controls: Parking Lot & Stats */}
       <div className="flex items-center justify-center gap-6 pt-2">
-        {/* Ambient audio toggle */}
-        <button
-          onClick={() => {
-            if (currentAmbient === 'none') setAmbientSound('rain');
-            else setAmbientSound('none');
-          }}
-          className={`flex flex-col items-center gap-1 text-[11px] font-bold transition-colors ${
-            currentAmbient !== 'none' ? 'text-purple-600' : 'text-slate-400 hover:text-purple-500'
-          }`}
-          title="Toggle Ambient Lo-fi Sound"
-        >
-          <div className="w-10 h-10 rounded-2xl bg-white border border-purple-100 flex items-center justify-center shadow-xs">
-            <Music className="w-5 h-5" />
-          </div>
-          <span>Ambient</span>
-        </button>
-
         {/* Distraction Parking Lot */}
         <button
           onClick={() => setShowParkingLotDrawer(!showParkingLotDrawer)}

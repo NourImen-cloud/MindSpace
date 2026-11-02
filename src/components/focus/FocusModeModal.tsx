@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Play, 
   Pause, 
   Square, 
   Minimize2, 
   CheckCircle2, 
-  Sparkles,
-  Music
+  Target,
+  Edit3
 } from 'lucide-react';
 import { useMindSpace } from '../../store/MindSpaceContext';
 import { formatSecondsToTimer } from '../../utils/formatters';
@@ -15,6 +15,7 @@ import { CozyStudyGirlIllustration } from '../common/AestheticAssets';
 
 export const FocusModeModal: React.FC = () => {
   const {
+    tasks,
     activeFocusSession,
     isFocusModalOpen,
     focusSecondsRemaining,
@@ -23,19 +24,28 @@ export const FocusModeModal: React.FC = () => {
     resumeFocusTimer,
     stopFocusSession,
     closeFocusModal,
-    currentAmbient,
-    setAmbientSound
   } = useMindSpace();
+
+  const [isSwitchingTask, setIsSwitchingTask] = useState(false);
 
   if (!isFocusModalOpen || !activeFocusSession) return null;
 
   const totalSeconds = (activeFocusSession.targetMinutes || 25) * 60;
   const progressPercent = Math.min(100, Math.max(0, ((totalSeconds - focusSecondsRemaining) / totalSeconds) * 100));
 
+  const handleSwitchTask = (taskId: string) => {
+    const found = tasks.find(t => t.id === taskId);
+    if (found) {
+      activeFocusSession.taskId = found.id;
+      activeFocusSession.taskTitle = found.title;
+    }
+    setIsSwitchingTask(false);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-[#FAF7FD] flex flex-col items-center justify-between p-4 sm:p-8 animate-fadeIn text-slate-800">
-      {/* Top Bar with minimize & soundscape */}
-      <div className="w-full max-w-4xl flex items-center justify-between z-10">
+    <div className="fixed inset-0 z-50 bg-[#FAF7FD] flex flex-col items-center justify-between p-3 sm:p-6 md:p-8 animate-fadeIn text-slate-800 overflow-y-auto max-h-screen">
+      {/* Top Bar with minimize */}
+      <div className="w-full max-w-4xl flex items-center justify-between z-10 shrink-0 mb-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-black text-purple-700 bg-purple-100 px-3.5 py-1 rounded-full border border-purple-200 flex items-center gap-1.5 shadow-xs">
             <span className="w-2 h-2 rounded-full bg-purple-600 animate-ping" />
@@ -43,23 +53,15 @@ export const FocusModeModal: React.FC = () => {
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Ambient selector */}
-          <div className="flex items-center gap-1.5 bg-white border border-purple-100 rounded-full p-1 text-xs shadow-xs">
-            {(['none', 'rain', 'forest', 'brown_noise'] as const).map(type => (
-              <button
-                key={type}
-                onClick={() => setAmbientSound(type)}
-                className={`px-3 py-1 rounded-full capitalize font-bold transition-colors ${
-                  currentAmbient === type
-                    ? 'bg-purple-600 text-white shadow-xs'
-                    : 'text-slate-500 hover:text-purple-600'
-                }`}
-              >
-                {type === 'brown_noise' ? 'Warm Drone' : type === 'none' ? 'Mute' : type}
-              </button>
-            ))}
-          </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsSwitchingTask(prev => !prev)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-purple-700 bg-white border border-purple-100 shadow-xs hover:bg-purple-50 transition-colors"
+            title="Switch task you are focusing on"
+          >
+            <Target className="w-3.5 h-3.5" />
+            <span>Switch Task</span>
+          </button>
 
           <button
             onClick={closeFocusModal}
@@ -71,19 +73,37 @@ export const FocusModeModal: React.FC = () => {
         </div>
       </div>
 
+      {/* Switch Task Dropdown if open */}
+      {isSwitchingTask && (
+        <div className="w-full max-w-md bg-white border border-purple-200 rounded-2xl p-3 shadow-lg z-20 space-y-2 animate-fadeIn mb-3">
+          <span className="text-xs font-black text-slate-800 block">Select Task to Anchor:</span>
+          <select
+            onChange={e => handleSwitchTask(e.target.value)}
+            value={activeFocusSession.taskId || ''}
+            className="w-full bg-[#FAF7FD] border border-purple-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-600"
+          >
+            {tasks.map(t => (
+              <option key={t.id} value={t.id}>
+                {t.title} ({t.estimatedMinutes}m)
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* Center Focus Core: Active Task + Illustration + Timer */}
-      <div className="flex flex-col items-center text-center space-y-4 max-w-lg my-auto">
+      <div className="flex flex-col items-center text-center space-y-3 sm:space-y-4 max-w-lg my-auto shrink-0 py-2">
         <div className="space-y-1">
-          <span className="text-[11px] font-black text-purple-600 uppercase tracking-widest">
+          <span className="text-[10px] sm:text-[11px] font-black text-purple-600 uppercase tracking-widest">
             Anchor Study Task
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight font-['Quicksand',sans-serif]">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800 tracking-tight font-['Quicksand',sans-serif] px-4 max-w-md truncate">
             {activeFocusSession.taskTitle}
           </h2>
         </div>
 
         {/* Circular Timer Visual with Anime Girl Inside */}
-        <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
+        <div className="relative w-52 h-52 sm:w-64 sm:h-64 flex items-center justify-center">
           {/* SVG Progress Ring */}
           <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
             <circle
@@ -108,23 +128,23 @@ export const FocusModeModal: React.FC = () => {
           </svg>
 
           {/* Inner Content */}
-          <div className="absolute inset-4 rounded-full bg-white shadow-md overflow-hidden flex flex-col items-center justify-center p-4">
-            <CozyStudyGirlIllustration className="w-28 h-28 -mt-2" />
-            <div className="font-extrabold text-3xl sm:text-4xl text-slate-800 tracking-tight font-['Quicksand',sans-serif] mt-1">
+          <div className="absolute inset-3 sm:inset-4 rounded-full bg-white shadow-md overflow-hidden flex flex-col items-center justify-center p-3 sm:p-4">
+            <CozyStudyGirlIllustration className="w-20 h-20 sm:w-28 sm:h-28 -mt-2" />
+            <div className="font-extrabold text-3xl sm:text-4xl text-slate-800 tracking-tight font-['Quicksand',sans-serif] mt-0.5">
               {formatSecondsToTimer(focusSecondsRemaining)}
             </div>
-            <span className="text-[11px] text-purple-600 font-bold">
+            <span className="text-[10px] sm:text-[11px] text-purple-600 font-bold">
               {isTimerRunning ? 'Flowing peacefully 🌸' : 'Paused in tranquility'}
             </span>
           </div>
         </div>
 
         {/* Playback Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 pt-1">
           {isTimerRunning ? (
             <button
               onClick={pauseFocusTimer}
-              className="flex items-center gap-2 px-6 py-3 rounded-full bg-white border border-purple-200 text-purple-700 font-extrabold text-xs shadow-md transition-all active:scale-95"
+              className="flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white border border-purple-200 text-purple-700 font-extrabold text-xs shadow-md transition-all active:scale-95"
             >
               <Pause className="w-4 h-4 fill-current" />
               <span>Pause Timer</span>
@@ -132,7 +152,7 @@ export const FocusModeModal: React.FC = () => {
           ) : (
             <button
               onClick={resumeFocusTimer}
-              className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-95 text-white font-extrabold text-xs shadow-lg shadow-purple-200 transition-all active:scale-95"
+              className="flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-95 text-white font-extrabold text-xs shadow-lg shadow-purple-200 transition-all active:scale-95"
             >
               <Play className="w-4 h-4 fill-current" />
               <span>Resume Flow</span>
@@ -141,8 +161,8 @@ export const FocusModeModal: React.FC = () => {
 
           <button
             onClick={() => stopFocusSession(true)}
-            className="flex items-center gap-1.5 px-4 py-3 rounded-full bg-purple-100 hover:bg-purple-200 text-purple-700 font-extrabold text-xs transition-colors"
-            title="Mark session as complete"
+            className="flex items-center gap-1.5 px-4 py-2.5 sm:py-3 rounded-full bg-purple-100 hover:bg-purple-200 text-purple-700 font-extrabold text-xs transition-colors"
+            title="Mark session as complete and log focus minutes"
           >
             <CheckCircle2 className="w-4 h-4" />
             <span>Complete</span>
@@ -150,7 +170,7 @@ export const FocusModeModal: React.FC = () => {
 
           <button
             onClick={() => stopFocusSession(false)}
-            className="p-3 rounded-full text-slate-400 hover:text-rose-500 bg-white border border-purple-100 transition-colors"
+            className="p-2.5 sm:p-3 rounded-full text-slate-400 hover:text-rose-500 bg-white border border-purple-100 transition-colors"
             title="End session"
           >
             <Square className="w-4 h-4" />
@@ -159,7 +179,7 @@ export const FocusModeModal: React.FC = () => {
       </div>
 
       {/* Bottom: Distraction Parking Lot */}
-      <div className="w-full max-w-md z-10 pb-2">
+      <div className="w-full max-w-md z-10 pb-2 shrink-0">
         <DistractionParkingLot />
       </div>
     </div>

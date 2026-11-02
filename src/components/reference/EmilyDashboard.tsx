@@ -717,7 +717,7 @@ export const EmilyDashboard: React.FC = () => {
 
                 {/* Card 4: Focus Time */}
                 <div 
-                  onClick={() => startFocusSession(activeTask, 25)}
+                  onClick={() => setActiveNav('focus')}
                   className="bg-white rounded-[26px] p-4 border border-[#ECE6D8] shadow-[0_4px_16px_rgba(0,0,0,0.02)] flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
                 >
                   <div className="shrink-0">
