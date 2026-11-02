@@ -78,6 +78,42 @@ export const EmilyDashboard: React.FC = () => {
     { id: '3', title: 'Gentle Return Ready 🌸', time: '20m ago', desc: 'Screen time pauses will guide you back to study.', unread: false }
   ]);
 
+  const handleToggleNotification = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: !n.unread } : n));
+  };
+
+  const handleDismissNotification = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const handleRequestBrowserPermission = async () => {
+    if ('Notification' in window) {
+      try {
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          new Notification('MINDSPACE Alerts Active! 🔔', {
+            body: 'Focus reminders and study notifications are enabled.',
+            icon: '/icon-192.png'
+          });
+        }
+      } catch (err) {
+        console.warn('Browser notification error:', err);
+      }
+    }
+  };
+
+  const handleAddTestNotification = () => {
+    const newNotif = {
+      id: 'notif-' + Date.now(),
+      title: 'Mindful Reminder 🌸',
+      time: 'Just now',
+      desc: 'Take a gentle deep breath and relax your neck & shoulders.',
+      unread: true
+    };
+    setNotifications(prev => [newNotif, ...prev]);
+  };
+
   // Modals state for Editability
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
@@ -514,13 +550,14 @@ export const EmilyDashboard: React.FC = () => {
                   {/* Notification Bell with Dedicated Dropdown Menu */}
                   <div className="relative">
                     <button 
-                      onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                      className="relative w-8 h-8 rounded-full bg-white border border-[#E9E4D8] flex items-center justify-center text-slate-600 shadow-xs hover:bg-slate-50 transition-colors"
-                      title="Notifications"
+                      onClick={() => setIsNotificationsOpen(prev => !prev)}
+                      className="relative w-8 h-8 rounded-full bg-white border border-[#E9E4D8] flex items-center justify-center text-slate-600 shadow-xs hover:bg-slate-50 transition-colors z-50 cursor-pointer"
+                      title="Notifications & Alerts"
+                      type="button"
                     >
                       <Bell className="w-3.5 h-3.5 fill-slate-500 text-slate-500" />
                       {notifications.some(n => n.unread) && (
-                        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#F43F5E] text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-xs">
+                        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#F43F5E] text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-xs animate-pulse">
                           {notifications.filter(n => n.unread).length}
                         </span>
                       )}
@@ -528,28 +565,88 @@ export const EmilyDashboard: React.FC = () => {
 
                     {/* Independent Notification Dropdown Menu */}
                     {isNotificationsOpen && (
-                      <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-[#E9E4D8] p-3 z-50 animate-fadeIn space-y-2">
-                        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                          <span className="text-xs font-black text-slate-900">Notifications</span>
-                          <button 
-                            onClick={() => setNotifications(prev => prev.map(n => ({ ...n, unread: false })))}
-                            className="text-[10px] font-bold text-purple-600 hover:text-purple-800"
-                          >
-                            Mark all read
-                          </button>
-                        </div>
-                        <div className="space-y-2 max-h-60 overflow-y-auto">
-                          {notifications.map(n => (
-                            <div key={n.id} className={`p-2 rounded-xl text-xs transition-colors ${n.unread ? 'bg-purple-50/70 border border-purple-100' : 'bg-slate-50'}`}>
-                              <div className="flex items-center justify-between">
-                                <span className="font-black text-slate-800 text-[11px]">{n.title}</span>
-                                <span className="text-[9px] text-slate-400 font-bold">{n.time}</span>
-                              </div>
-                              <p className="text-[10px] text-slate-600 font-medium mt-0.5">{n.desc}</p>
+                      <>
+                        <div 
+                          className="fixed inset-0 z-40 bg-slate-900/10"
+                          onClick={() => setIsNotificationsOpen(false)} 
+                        />
+
+                        <div className="absolute right-0 mt-2 w-72 sm:w-84 bg-white rounded-2xl shadow-2xl border border-[#E9E4D8] p-3.5 z-50 animate-fadeIn space-y-2.5">
+                          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <div className="flex items-center gap-1.5">
+                              <Bell className="w-3.5 h-3.5 text-purple-600" />
+                              <span className="text-xs font-black text-slate-900">Notifications ({notifications.length})</span>
                             </div>
-                          ))}
+                            <div className="flex items-center gap-2">
+                              {notifications.some(n => n.unread) && (
+                                <button 
+                                  onClick={() => setNotifications(prev => prev.map(n => ({ ...n, unread: false })))}
+                                  className="text-[10px] font-bold text-purple-600 hover:text-purple-800"
+                                >
+                                  Mark read
+                                </button>
+                              )}
+                              {notifications.length > 0 && (
+                                <button 
+                                  onClick={() => setNotifications([])}
+                                  className="text-[10px] font-bold text-slate-400 hover:text-rose-600"
+                                >
+                                  Clear
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5 max-h-60 overflow-y-auto pr-0.5">
+                            {notifications.length === 0 ? (
+                              <div className="py-6 text-center space-y-1">
+                                <p className="text-xs text-slate-400 font-bold">No active notifications</p>
+                                <p className="text-[10px] text-slate-400">All caught up! You are in total flow 🌸</p>
+                              </div>
+                            ) : (
+                              notifications.map(n => (
+                                <div 
+                                  key={n.id} 
+                                  onClick={() => handleToggleNotification(n.id)}
+                                  className={`p-2.5 rounded-xl text-xs transition-colors cursor-pointer group flex items-start justify-between gap-2 ${
+                                    n.unread ? 'bg-purple-50/70 border border-purple-100 shadow-2xs' : 'bg-slate-50/80 border border-transparent'
+                                  }`}
+                                >
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-black text-slate-800 text-[11px] truncate">{n.title}</span>
+                                      <span className="text-[9px] text-slate-400 font-bold shrink-0 ml-1">{n.time}</span>
+                                    </div>
+                                    <p className="text-[10px] text-slate-600 font-medium mt-0.5 leading-snug">{n.desc}</p>
+                                  </div>
+                                  <button
+                                    onClick={(e) => handleDismissNotification(n.id, e)}
+                                    className="text-slate-300 hover:text-rose-500 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                                    title="Dismiss"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ))
+                            )}
+                          </div>
+
+                          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold">
+                            <button
+                              onClick={handleRequestBrowserPermission}
+                              className="text-purple-600 hover:text-purple-800 flex items-center gap-1"
+                            >
+                              🔔 Enable System Alerts
+                            </button>
+                            <button
+                              onClick={handleAddTestNotification}
+                              className="text-slate-500 hover:text-purple-600"
+                            >
+                              + Test Reminder
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      </>
                     )}
                   </div>
 
